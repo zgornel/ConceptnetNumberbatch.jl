@@ -1,0 +1,6 @@
+authors = ["Corneliu Cofaru <cornel@oxoaresearch.com>"]
+name = "ConceptNetNumberbatch"
+uuid = "2d1d9008-b762-11e8-11f1-375fdd6dca71"
+version = "0.0.1"
+
+[deps]
