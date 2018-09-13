@@ -1,4 +1,4 @@
-module ConceptNetNumberbatch
+module ConceptnetNumberbatch
 
 greet() = print("Hello World!")
 
