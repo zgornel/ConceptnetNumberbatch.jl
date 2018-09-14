@@ -1,6 +1,10 @@
-authors = ["Corneliu Cofaru <cornel@oxoaresearch.com>"]
 name = "ConceptnetNumberbatch"
 uuid = "2d1d9008-b762-11e8-11f1-375fdd6dca71"
+authors = ["Corneliu Cofaru <cornel@oxoaresearch.com>"]
 version = "0.0.1"
 
 [deps]
+CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
+Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TranscodingStreams = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
