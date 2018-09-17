@@ -10,7 +10,7 @@ function download_embeddings(;url=CONCEPTNET_EN_LINK,
     !isempty(_dir) && !isdir(_dir) && mkpath(_dir)
     @info "Download ConceptNetNumberbatch to $localfile..."
     if !isfile(localfile)
-        dowload(url, localfile)
+        download(url, localfile)
         if isfile(localfile) return localfile end
     else
         @warn "$localfile already exists. Will not download."
