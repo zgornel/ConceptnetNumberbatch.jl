@@ -2,15 +2,20 @@ using Test
 using Serialization
 using ConceptnetNumberbatch
 
-# Burn-in
-const CPTNET_PATH = joinpath(string(@__DIR__), "data", "_test_file.txt.gz")
+# Test file with just 2 entriesa (test purposes only)
+const CONCEPTNET_TEST_FILES = [
+    joinpath(string(@__DIR__), "data", "_test_file.txt.gz"),
+    joinpath(string(@__DIR__), "data", "_test_file.txt"),
+    joinpath(string(@__DIR__), "data", "_test_file.h5")
+    ]
 
 @testset "Parser" begin
-    _len, _width, cptnet= parse_file(CPTNET_PATH);
-    pop!(cptnet, "")  # remove the last entry i.e. ""=>[]
-    @test _len == length(cptnet)
-    for k in keys(cptnet)
-        @test _width == length(cptnet[k])
+    for file in CONCEPTNET_TEST_FILES
+        cptnet, _len, _width= ConceptnetNumberbatch.load_embeddings(file);
+        @test _len == length(cptnet)
+        for k in keys(cptnet)
+            @test _width == length(cptnet[k])
+        end
     end
 end
 
