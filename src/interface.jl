@@ -60,7 +60,6 @@ function _load_gz_embeddings(file::S1,
                              desc="Loading embeddings...",
                              barlen=50, color=:white,
                              barglyphs=BarGlyphs("[=> ]"))
-        
         no_custom_words = length(keep_words)==0
         lines = readlines(cfid)
         cnt = 0
@@ -122,7 +121,7 @@ function _get_vocab_size(real_vocab_size,
 
     # The real dataset cannot contain negative samples
     real_vocab_size = max(0, real_vocab_size)
-    # If no maximum number of words is specified, 
+    # If no maximum number of words is specified,
     # maximum size is the actual size
     if max_vocab_size == nothing
         max_vocab_size = real_vocab_size
