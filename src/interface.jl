@@ -109,7 +109,9 @@ function _load_hdf5_embeddings(file::S1,
             end
         end
     end
-    return word_embeddings, length(words), size(embeddings,1)
+    _length::Int = length(words)
+    _width::Int = size(embeddings,1)
+    return word_embeddings, _length, _width
 end
 
 
@@ -133,7 +135,6 @@ function _get_vocab_size(real_vocab_size,
     if n_custom_words > 0
         max_vocab_size = min(max_vocab_size, n_custom_words)
     end
-    @info "max_vocab_size=$max_vocab_size"
     return max_vocab_size
 end
 

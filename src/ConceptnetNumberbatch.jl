@@ -8,7 +8,6 @@
 
 module ConceptnetNumberbatch
 
-using Serialization
 using TranscodingStreams
 using CodecZlib
 using ProgressMeter
