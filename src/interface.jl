@@ -61,11 +61,11 @@ function _load_gz_embeddings(file::S1,
                              barlen=50, color=:white,
                              barglyphs=BarGlyphs("[=> ]"))
         no_custom_words = length(keep_words)==0
-        lines = readlines(cfid)
         cnt = 0
-        for (idx, line) in enumerate(lines)
-            word, embedding = _parseline(line)
+        for (idx, line) in enumerate(eachline(cfid))
+            word, _ = _parseline(line, word_only=true)
             if word in keep_words || no_custom_words
+                _, embedding = _parseline(line)
                 push!(word_embeddings, word=>embedding)
                 update!(_progress, idx)
                 cnt+=1
@@ -138,10 +138,13 @@ function _get_vocab_size(real_vocab_size,
 end
 
 
-function _parseline(buf)
+function _parseline(buf; word_only=false)
     bufvec = split(buf, " ")
-    keyword = string(popfirst!(bufvec))
-    embedding = parse.(Float64, bufvec)
-    #embedding = map(x->parse(Float64,x), bufvec)
-    return (keyword => embedding)
+    word = string(popfirst!(bufvec))
+    if word_only
+        return word, Float64[]
+    else
+        embedding = parse.(Float64, bufvec)
+        return word, embedding
+    end
 end
