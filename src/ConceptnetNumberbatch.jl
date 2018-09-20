@@ -13,6 +13,8 @@ using CodecZlib
 using ProgressMeter
 using HDF5
 
+import Base: getindex, size, length, show
+
 # Links pointing to the latest ConceptNetNumberbatch version (v"17.06")
 const CONCEPTNET_MULTI_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-17.06.txt.gz"
 const CONCEPTNET_EN_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-en-17.06.txt.gz"
@@ -21,9 +23,12 @@ const CONCEPTNET_HDF5_LINK = "https://conceptnet.s3.amazonaws.com/precomputed-da
 export CONCEPTNET_MULTI_LINK,
        CONCEPTNET_EN_LINK,
        CONCEPTNET_HDF5_LINK,
+       ConceptNet,
        download_embeddings,
        load_embeddings
 
 include("interface.jl")
+include("files.jl")
+include("search.jl")
 
 end # module
