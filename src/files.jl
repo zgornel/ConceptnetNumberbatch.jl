@@ -20,22 +20,22 @@ end
 
 
 # Function that loads the embeddings given a valid ConceptNetNumberbatch file
-function load_embeddings(file::AbstractString;
+function load_embeddings(filepath::AbstractString;
                          max_vocab_size::Union{Nothing,Int}=nothing,
                          keep_words=String[],
                          language=:unknown)
-    if any(endswith.(file, [".gz", ".gzip"]))
-        conceptnet = _load_gz_embeddings(file,
+    if any(endswith.(filepath, [".gz", ".gzip"]))
+        conceptnet = _load_gz_embeddings(filepath,
                                          GzipDecompressor(),
                                          max_vocab_size,
                                          keep_words,
                                          language=language)
-    elseif any(endswith.(file, [".h5", ".hdf5"]))
-        conceptnet = _load_hdf5_embeddings(file,
+    elseif any(endswith.(filepath, [".h5", ".hdf5"]))
+        conceptnet = _load_hdf5_embeddings(filepath,
                                            max_vocab_size,
                                            keep_words)
     else
-        conceptnet = _load_gz_embeddings(file,
+        conceptnet = _load_gz_embeddings(filepath,
                                          Noop(),
                                          max_vocab_size,
                                          keep_words,
@@ -46,7 +46,7 @@ end
 
 
 # Loads the ConceptNetNumberbatch from a .gz or uncompressed file
-function _load_gz_embeddings(file::S1,
+function _load_gz_embeddings(filepath::S1,
                              decompressor::TranscodingStreams.Codec,
                              max_vocab_size::Union{Nothing,Int},
                              keep_words::Vector{S2};
@@ -56,7 +56,7 @@ function _load_gz_embeddings(file::S1,
           _length::Int, _width::Int
     type_words = Vector{String}
     type_matrix = Matrix{Float64}
-    open(file, "r") do fid
+    open(filepath, "r") do fid
         cfid = TranscodingStream(decompressor, fid)
         _length, _width = parse.(Int64, split(readline(cfid)))
         embeddings_words = type_words(undef, _length)
@@ -96,13 +96,13 @@ end
 
 
 # Loads the ConceptNetNumberbatch from a HDF5 file
-function _load_hdf5_embeddings(file::S1,
+function _load_hdf5_embeddings(filepath::S1,
                                max_vocab_size::Union{Nothing,Int},
                                keep_words::Vector{S2}) where
         {S1<:AbstractString, S2<:AbstractString}
     type_words = Vector{String}
     type_matrix = Matrix{Int8}
-    payload = h5open(read, file)["mat"]
+    payload = h5open(read, filepath)["mat"]
     words = payload["axis1"]
     embeddings = payload["block0_values"]
     vocab_size = _get_vocab_size(length(words),

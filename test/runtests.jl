@@ -57,6 +57,30 @@ max_vocab_size=5
     end
 end
 
+@testset "getindex, size, length" begin
+    filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
+    # Known language
+    conceptnet, _, _ = load_embeddings(filepath, language=:en)
+    words = ["####_ish", "####_form", "####_metres", "not_found", "not_found2"]
+    embeddings = conceptnet[words]
+    for (idx, word) in enumerate(words)
+        if word in conceptnet.words
+            @test embeddings[:,[idx]] ==
+                conceptnet.embeddings[:, indexin([word], conceptnet.words)]
+        else
+            @test iszero(embeddings[:,idx])
+        end
+    end
+    # Unknown language
+    conceptnet, _, _ = load_embeddings(filepath)  # unknown language
+    @test_throws ArgumentError conceptnet[words]
+    # length
+    @test length(conceptnet) == length(conceptnet.words)
+    # size
+    @test size(conceptnet) == size(conceptnet.embeddings)
+end
+
+
 # show methods
 @testset "Show methods" begin
     buf = IOBuffer()

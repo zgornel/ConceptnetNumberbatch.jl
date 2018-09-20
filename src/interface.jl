@@ -12,7 +12,7 @@ ConceptNet(words::W, embeddings::E) where
 const ConceptNetMulti = ConceptNet{:multi, Vector{String}, Matrix{Float64}}
 const ConceptNetMultiCompressed = ConceptNet{:multi_c, Vector{String}, Matrix{Int8}}
 const ConceptNetEnglish = ConceptNet{:en, Vector{String}, Matrix{Float64}}
-const ConceptNetUnknown = ConceptNet{:ubknown, Vector{String}, Matrix{Float64}}
+const ConceptNetUnknown = ConceptNet{:unknown, Vector{String}, Matrix{Float64}}
 
 
 # Show methods
@@ -32,35 +32,26 @@ show(io::IO, conceptnet::ConceptNetUnknown) = begin
     print(io, "ConceptNet (Unknown language) with $(length(conceptnet.words)) embeddings")
 end
 
-
-# getindex methods 
-function getindex(conceptnet::ConceptNetMultiCompressed, words::S) where
-        {S<:AbstractVector{<:AbstractString}}
-    @warn "Results may be wrong!"
-    return conceptnet.embeddings[:, findall((in)(words), conceptnet.words)]
-end
-
-function getindex(conceptnet::ConceptNetMulti, words::S) where
-        {S<:AbstractVector{<:AbstractString}}
-    @warn "Results may be wrong!"
-    return conceptnet.embeddings[:, findall((in)(words), conceptnet.words)]
-end
-
-function getindex(conceptnet::ConceptNetEnglish, words::S) where
+# TODO(Corneliu):
+#   - specific implementation for multilanguage files (w. language detection)
+#   - add OOV - pre-processing functions
+function getindex(conceptnet::ConceptNet, words::S) where
         {S<:AbstractVector{<:AbstractString}}
     lenemb = size(conceptnet.embeddings, 1)
     embeddings = zeros(eltype(conceptnet.embeddings), lenemb, length(words))
-    indices = indexin(conceptnet.words, words)
-    for idx in indices
+    indices = indexin(words, conceptnet.words)
+    for (i, idx) in enumerate(indices)
         if idx != nothing
-            embeddings[:,idx] = conceptnet.embeddings[:, idx]
+            embeddings[:,i] = conceptnet.embeddings[:, idx]
         end
     end
     return embeddings
 end
 
-getindex(::ConceptNetUnknown, words::S) where {S<:Vector{<:AbstractString}} =
-     @error "Indexing not supported for an :unknown language ConceptNet"
+getindex(::ConceptNetUnknown, words::S) where {S<:Vector{<:AbstractString}} = begin
+    throw(ArgumentError("Indexing not supported for an :unknown language ConceptNet"))
+end
+
 
 getindex(conceptnet::ConceptNet, word::S where S<:AbstractString)= conceptnet[[word]]
 
