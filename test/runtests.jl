@@ -56,3 +56,17 @@ max_vocab_size=5
         end
     end
 end
+
+# show methods
+@testset "Show methods" begin
+    buf = IOBuffer()
+    for (filename, (language, _, _)) in CONCEPTNET_TEST_DATA
+        try
+            conceptnet = load_embeddings(filename, language=language)
+            show(buf, conceptnet)
+            @test true
+        catch
+            @test false
+        end
+    end
+end
