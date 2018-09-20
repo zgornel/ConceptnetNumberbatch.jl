@@ -14,6 +14,7 @@ const ConceptNetMultiCompressed = ConceptNet{:multi_c, Vector{String}, Matrix{In
 const ConceptNetEnglish = ConceptNet{:en, Vector{String}, Matrix{Float64}}
 const ConceptNetUnknown = ConceptNet{:ubknown, Vector{String}, Matrix{Float64}}
 
+
 # Show methods
 show(io::IO, conceptnet::ConceptNetMultiCompressed) = begin
     print(io, "ConceptNet (multilanguage, compressed) with $(length(conceptnet.words)) embeddings")
@@ -58,8 +59,7 @@ function getindex(conceptnet::ConceptNetEnglish, words::S) where
     return embeddings
 end
 
-getindex(::ConceptNetUnknown{N, W, E}, words::S) where
-         {N, W, E, S<:Vector{<:AbstractString}} =
+getindex(::ConceptNetUnknown, words::S) where {S<:Vector{<:AbstractString}} =
      @error "Indexing not supported for an :unknown language ConceptNet"
 
 getindex(conceptnet::ConceptNet, word::S where S<:AbstractString)= conceptnet[[word]]
