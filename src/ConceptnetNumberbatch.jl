@@ -13,7 +13,7 @@ using CodecZlib
 using ProgressMeter
 using HDF5
 
-import Base: getindex, size, length, show
+import Base: getindex, size, length, show, keys, values
 
 # Links pointing to the latest ConceptNetNumberbatch version (v"17.06")
 const CONCEPTNET_MULTI_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-17.06.txt.gz"

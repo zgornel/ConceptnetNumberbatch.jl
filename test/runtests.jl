@@ -6,27 +6,27 @@ const CONCEPTNET_TEST_DATA = Dict(  # filename => output type
     (joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz") =>
      (:en,
       ["####_ish", "####_form", "####_metres"],
-      ConceptNet{:en, Vector{String}, Matrix{Float64}})),
+      ConceptNet{:en, String, Vector{Float64}})),
 
     (joinpath(string(@__DIR__), "data", "_test_file_en.txt") =>
      (:en,
       ["####_ish", "####_form", "####_metres"],
-      ConceptNet{:en, Vector{String}, Matrix{Float64}})),
+      ConceptNet{:en, String, Vector{Float64}})),
 
     (joinpath(string(@__DIR__), "data", "_test_file.txt") =>
      (:multi,
      ["/c/af/1_konings", "/c/af/aaklig", "/c/af/aak"],
-      ConceptNet{:multi, Vector{String}, Matrix{Float64}})),
+      ConceptNet{:multi, String, Vector{Float64}})),
 
     (joinpath(string(@__DIR__), "data", "_test_file.h5") =>
      (:multi_c,
       ["/c/de/1", "/c/de/2", "/c/de/2d"],
-      ConceptNet{:multi_c, Vector{String}, Matrix{Int8}}))
+      ConceptNet{:multi_c, String, Vector{Int8}}))
    )
 
 @testset "Parser: (no arguments)" begin
     for (filename, (language, _, resulting_type)) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width= load_embeddings(filename, language=language);
+        conceptnet, _len, _width = load_embeddings(filename, language=language);
         @test conceptnet isa resulting_type
         @test _len isa Int
         @test _len == length(conceptnet)
@@ -38,8 +38,8 @@ end
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5" begin
     for (filename, _) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width= load_embeddings(filename,
-                                                  max_vocab_size=max_vocab_size);
+        conceptnet, _len, _width = load_embeddings(filename,
+                                                   max_vocab_size=max_vocab_size);
         @test length(conceptnet) == max_vocab_size
     end
 end
@@ -47,12 +47,12 @@ end
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5, 3 keep words" begin
     for (filename, (_, keep_words, _)) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width= load_embeddings(filename,
-                                                  max_vocab_size=max_vocab_size,
-                                                  keep_words=keep_words)
+        conceptnet, _len, _width = load_embeddings(filename,
+                                                   max_vocab_size=max_vocab_size,
+                                                   keep_words=keep_words)
         @test length(conceptnet) == length(keep_words)
         for word in keep_words
-            @test word in conceptnet.words
+            @test word in keys(conceptnet)
         end
     end
 end
@@ -64,9 +64,8 @@ end
     words = ["####_ish", "####_form", "####_metres", "not_found", "not_found2"]
     embeddings = conceptnet[words]
     for (idx, word) in enumerate(words)
-        if word in conceptnet.words
-            @test embeddings[:,[idx]] ==
-                conceptnet.embeddings[:, indexin([word], conceptnet.words)]
+        if word in keys(conceptnet)
+            @test embeddings[:,idx] == conceptnet.embeddings[word]
         else
             @test iszero(embeddings[:,idx])
         end
@@ -75,9 +74,11 @@ end
     conceptnet, _, _ = load_embeddings(filepath)  # unknown language
     @test_throws ArgumentError conceptnet[words]
     # length
-    @test length(conceptnet) == length(conceptnet.words)
+    @test length(conceptnet) == length(keys(conceptnet))
     # size
-    @test size(conceptnet) == size(conceptnet.embeddings)
+    @test size(conceptnet) == (conceptnet.width, length(conceptnet.embeddings))
+    @test size(conceptnet, 1) == conceptnet.width
+    @test size(conceptnet, 2) == length(conceptnet.embeddings)
 end
 
 

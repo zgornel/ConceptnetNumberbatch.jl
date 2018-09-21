@@ -14,7 +14,7 @@ function download_embeddings(;url=CONCEPTNET_EN_LINK,
         if isfile(localfile) return localfile end
     else
         @warn "$localfile already exists. Will not download."
-        return localfile 
+        return localfile
     end
 end
 
@@ -52,15 +52,13 @@ function _load_gz_embeddings(filepath::S1,
                              keep_words::Vector{S2};
                              language::Symbol=:unknown) where
         {S1<:AbstractString, S2<:AbstractString}
-    local embeddings_words, embeddings_matrix, indices,
-          _length::Int, _width::Int
-    type_words = Vector{String}
-    type_matrix = Matrix{Float64}
+    local embeddings, indices, _length::Int, _width::Int
+    type_word = String
+    type_vector = Vector{Float64}
     open(filepath, "r") do fid
         cfid = TranscodingStream(decompressor, fid)
         _length, _width = parse.(Int64, split(readline(cfid)))
-        embeddings_words = type_words(undef, _length)
-        embeddings_matrix = type_matrix(undef, _width, _length)
+        embeddings = Dict{type_word, type_vector}()
         vocab_size = _get_vocab_size(_length,
                                      max_vocab_size,
                                      keep_words)
@@ -75,9 +73,7 @@ function _load_gz_embeddings(filepath::S1,
             word, _ = _parseline(line, word_only=true)
             if word in keep_words || no_custom_words
                 _, embedding = _parseline(line)
-                push!(indices, idx)
-                embeddings_words[idx] = word
-                embeddings_matrix[:,idx] = embedding
+                push!(embeddings, word=>embedding)
                 update!(_progress, idx)
                 cnt+=1
                 if cnt > vocab_size-1
@@ -87,10 +83,7 @@ function _load_gz_embeddings(filepath::S1,
         end
         close(cfid)
     end
-    return ConceptNet{language,
-                      type_words,
-                      type_matrix}(embeddings_words[indices],
-                                   embeddings_matrix[:,indices]),
+    return ConceptNet{language, type_word, type_vector}(embeddings, _width),
            _length, _width
 end
 
@@ -100,8 +93,8 @@ function _load_hdf5_embeddings(filepath::S1,
                                max_vocab_size::Union{Nothing,Int},
                                keep_words::Vector{S2}) where
         {S1<:AbstractString, S2<:AbstractString}
-    type_words = Vector{String}
-    type_matrix = Matrix{Int8}
+    type_word = String
+    type_matrix = Vector{Int8}
     payload = h5open(read, filepath)["mat"]
     words = payload["axis1"]
     embeddings = payload["block0_values"]
@@ -127,10 +120,9 @@ function _load_hdf5_embeddings(filepath::S1,
     end
     _length::Int = length(words)
     _width::Int = size(embeddings,1)
-    return ConceptNet{:multi_c,
-                      type_words,
-                      type_matrix}(words[indices],
-                                   embeddings[:, indices]),
+    return ConceptNet{:multi_c, type_word, type_matrix}(
+                Dict(words[index]=>embeddings[:, index]
+                     for index in indices), _width),
            _length, _width
 end
 
