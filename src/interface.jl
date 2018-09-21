@@ -40,10 +40,9 @@ function getindex(conceptnet::ConceptNet, words::S) where
     lenemb = size(conceptnet.embeddings, 1)
     embeddings = zeros(eltype(conceptnet.embeddings), lenemb, length(words))
     indices = indexin(words, conceptnet.words)
+    filter!(x->x!=nothing, indices)
     for (i, idx) in enumerate(indices)
-        if idx != nothing
             embeddings[:,i] = conceptnet.embeddings[:, idx]
-        end
     end
     return embeddings
 end
