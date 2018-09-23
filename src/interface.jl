@@ -42,7 +42,7 @@ end
 function getindex(conceptnet::ConceptNet{N,K,V}, words::S) where
         {N, K, V, S<:AbstractVector{<:AbstractString}}
     return hcat((get(conceptnet.embeddings, word, zeros(eltype(V), conceptnet.width))
-                     for word in words)...)
+                 for word in words)...)::Matrix{eltype(V)}
 end
 
 getindex(::ConceptNetUnknown, words::S) where {S<:Vector{<:AbstractString}} = begin

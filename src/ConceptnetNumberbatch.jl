@@ -12,6 +12,7 @@ using TranscodingStreams
 using CodecZlib
 using ProgressMeter
 using HDF5
+using StringDistances
 
 import Base: getindex, size, length, show, keys, values
 
@@ -25,7 +26,8 @@ export CONCEPTNET_MULTI_LINK,
        CONCEPTNET_HDF5_LINK,
        ConceptNet,
        download_embeddings,
-       load_embeddings
+       load_embeddings,
+       word_embeddings
 
 include("interface.jl")
 include("files.jl")
