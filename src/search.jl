@@ -1,3 +1,8 @@
+#TODO(Corneliu) Implement word_embeddings for other ConceptNet types
+#TODO(Corneliu) Implement faster fuzzy matcher (i.e. n-gram based/NearestNeighbors)
+
+
+
 function word_embeddings(conceptnet::ConceptNetEnglish,
                          phrase::S where S<:AbstractString;
                          search_mismatches::Bool=true,
