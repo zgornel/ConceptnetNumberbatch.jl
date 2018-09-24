@@ -101,6 +101,12 @@ git-tree-sha1 = "fec8e4d433072731466d37ed0061b3ba7f70eeb9"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.19.0"
 
+[[Languages]]
+deps = ["JSON", "Test"]
+git-tree-sha1 = "460302a55509ae9aef8222bdc0c2a6482d8930f3"
+uuid = "8ef0a80b-9436-5d2c-a485-80b904378c43"
+version = "0.4.0"
+
 [[LibCURL]]
 deps = ["BinaryProvider", "Compat", "Libdl", "Pkg", "Printf"]
 git-tree-sha1 = "6339c87cb76923a3cf947fcd213cbc364355c9c9"
@@ -164,12 +170,6 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-
-[[ProgressMeter]]
-deps = ["Printf", "Random", "Test"]
-git-tree-sha1 = "09e653f4b0a3c44628f0bdd0a0e58bc92e0264ef"
-uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "0.6.0"
 
 [[REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets"]

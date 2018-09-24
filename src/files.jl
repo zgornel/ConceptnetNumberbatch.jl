@@ -23,23 +23,28 @@ end
 function load_embeddings(filepath::AbstractString;
                          max_vocab_size::Union{Nothing,Int}=nothing,
                          keep_words=String[],
-                         language=:unknown)
+                         languages::Union{Nothing, Vector{<:Languages.Language}}=nothing)
+    if languages == nothing
+        languages = unique(collect(values(LANG_MAP)))
+    end
+
     if any(endswith.(filepath, [".gz", ".gzip"]))
         conceptnet = _load_gz_embeddings(filepath,
                                          GzipDecompressor(),
                                          max_vocab_size,
                                          keep_words,
-                                         language=language)
+                                         languages=languages)
     elseif any(endswith.(filepath, [".h5", ".hdf5"]))
         conceptnet = _load_hdf5_embeddings(filepath,
                                            max_vocab_size,
-                                           keep_words)
+                                           keep_words,
+                                           languages=languages)
     else
         conceptnet = _load_gz_embeddings(filepath,
                                          Noop(),
                                          max_vocab_size,
                                          keep_words,
-                                         language=language)
+                                         languages=languages)
     end
     return conceptnet
 end
@@ -50,80 +55,95 @@ function _load_gz_embeddings(filepath::S1,
                              decompressor::TranscodingStreams.Codec,
                              max_vocab_size::Union{Nothing,Int},
                              keep_words::Vector{S2};
-                             language::Symbol=:unknown) where
+                             languages::Union{Nothing, Vector{<:Languages.Language}}=nothing) where
         {S1<:AbstractString, S2<:AbstractString}
-    local embeddings, indices, _length::Int, _width::Int
+    local lang_embs, _length::Int, _width::Int, type_lang
     type_word = String
     type_vector = Vector{Float64}
     open(filepath, "r") do fid
         cfid = TranscodingStream(decompressor, fid)
         _length, _width = parse.(Int64, split(readline(cfid)))
-        embeddings = Dict{type_word, type_vector}()
         vocab_size = _get_vocab_size(_length,
                                      max_vocab_size,
                                      keep_words)
-        _progress = Progress(vocab_size, dt=1,
-                             desc="Loading embeddings...",
-                             barlen=50, color=:white,
-                             barglyphs=BarGlyphs("[=> ]"))
         no_custom_words = length(keep_words)==0
+        if languages isa Vector{Languages.English}
+            lang_embs = Dict{Languages.English, Dict{type_word, type_vector}}()
+            english_only=true
+            type_lang = Languages.English
+        else
+            lang_embs = Dict{Languages.Language, Dict{type_word, type_vector}}()
+            english_only=false
+            type_lang = Languages.Language
+        end
+
+        lang = :en
         cnt = 0
-        indices = Int[]
         for (idx, line) in enumerate(eachline(cfid))
             word, _ = _parseline(line, word_only=true)
+            if !english_only
+                _, _, _lang, word = split(word,"/")
+                lang = Symbol(_lang)
+            end
             if word in keep_words || no_custom_words
-                _, embedding = _parseline(line)
-                push!(embeddings, word=>embedding)
-                update!(_progress, idx)
-                cnt+=1
-                if cnt > vocab_size-1
-                    break
+                if lang in keys(LANG_MAP) && LANG_MAP[lang] in languages  # use only languages mapped in LANG_MAP
+                    _llang = LANG_MAP[lang]
+                    if !(_llang in keys(lang_embs))
+                        push!(lang_embs, _llang=>Dict{type_word, type_vector}())
+                    end
+                    _, embedding = _parseline(line, word_only=false)
+                    push!(lang_embs[_llang], word=>embedding)
+                    cnt+=1
+                    if cnt > vocab_size-1
+                        break
+                    end
                 end
             end
         end
         close(cfid)
     end
-    return ConceptNet{language, type_word, type_vector}(embeddings, _width),
-           _length, _width
+    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, _width), _length, _width
 end
 
 
 # Loads the ConceptNetNumberbatch from a HDF5 file
 function _load_hdf5_embeddings(filepath::S1,
                                max_vocab_size::Union{Nothing,Int},
-                               keep_words::Vector{S2}) where
+                               keep_words::Vector{S2};
+                               languages::Union{Nothing, Vector{<:Languages.Language}}=nothing) where
         {S1<:AbstractString, S2<:AbstractString}
     type_word = String
-    type_matrix = Vector{Int8}
+    type_vector = Vector{Int8}
     payload = h5open(read, filepath)["mat"]
-    words = payload["axis1"]
+    words = map(payload["axis1"]) do val
+        _, _, lang, word = split(val, "/")
+        return Symbol(lang), word
+    end
     embeddings = payload["block0_values"]
     vocab_size = _get_vocab_size(length(words),
                                  max_vocab_size,
                                  keep_words)
-    _progress = Progress(vocab_size, dt=1,
-                         desc="Loading embeddings...",
-                         barlen=50, color=:white,
-                         barglyphs=BarGlyphs("[=> ]"))
     no_custom_words = length(keep_words)==0
     cnt = 0
-    indices = Int[]
-    for (idx, word) in enumerate(words)
+    lang_embs = Dict{Languages.Language, Dict{type_word, type_vector}}()
+    for (idx, (lang, word)) in enumerate(words)
         if word in keep_words || no_custom_words
-            push!(indices, idx)
-            update!(_progress, idx)
-            cnt+=1
-            if cnt > vocab_size-1
-                break
+            if lang in keys(LANG_MAP) && LANG_MAP[lang] in languages  # use only languages mapped in LANG_MAP
+                _llang = LANG_MAP[lang]
+                if !(_llang in keys(lang_embs))
+                    push!(lang_embs, _llang=>Dict{type_word, type_vector}())
+                end
+                push!(lang_embs[_llang], word=>embeddings[:,idx])
+                cnt+=1
+                if cnt > vocab_size-1
+                    break
+                end
             end
         end
     end
     _length::Int = length(words)
     _width::Int = size(embeddings,1)
-    return ConceptNet{:multi_c, type_word, type_matrix}(
-                Dict(words[index]=>embeddings[:, index]
-                     for index in indices), _width),
-           _length, _width
+    return ConceptNet{Languages.Language, type_word, type_vector}(lang_embs, _width), _length, _width
 end
 
 

@@ -5,6 +5,7 @@
 
 function word_embeddings(conceptnet::ConceptNetEnglish,
                          phrase::S where S<:AbstractString;
+                         keep_size::Bool=true,
                          search_mismatches::Bool=true,
                          distance=Jaro())
     dictionary = collect(keys(conceptnet))
@@ -22,10 +23,10 @@ function word_embeddings(conceptnet::ConceptNetEnglish,
     for pos in not_found
         if search_mismatches
             matcher = word->evaluate(distance, tokens[pos], word)
-            _, match_pos = findmin(map(matcher, dictionary))    
-            push!(words, dictionary[match_pos]) 
+            _, match_pos = findmin(map(matcher, dictionary))
+            push!(words, dictionary[match_pos])
         else
-            push!(words, tokens[pos])
+            keep_size && push!(words, tokens[pos])
         end
     end
     @show words
@@ -34,7 +35,7 @@ end
 
 
 # Function that searches subphrases (continuous token combinations)
-# from a phrase in a dictionary and returns the positions of matched 
+# from a phrase in a dictionary and returns the positions of matched
 # subphrases/words
 function token_search(tokens, dictionary; sep::String="_", max_length::Int=3)
     found = Vector{UnitRange{Int}}()
@@ -42,9 +43,9 @@ function token_search(tokens, dictionary; sep::String="_", max_length::Int=3)
     i = 1
     j = n
     while length(tokens)!=0 && i<=j
-        if i > n || j <=0 
-            break 
-        elseif j-i+1 > max_length 
+        if i > n || j <=0
+            break
+        elseif j-i+1 > max_length
             j -=1
         else
             tok = join(tokens[i:j], sep)

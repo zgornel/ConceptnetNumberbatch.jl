@@ -1,35 +1,35 @@
 using Test
+using Languages
 using ConceptnetNumberbatch
 
 # Test file with just 2 entriesa (test purposes only)
 const CONCEPTNET_TEST_DATA = Dict(  # filename => output type
     (joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz") =>
-     (:en,
+     ([Languages.English()],
       ["####_ish", "####_form", "####_metres"],
-      ConceptNet{:en, String, Vector{Float64}})),
+      ConceptNet{Languages.English, String, Vector{Float64}})),
 
     (joinpath(string(@__DIR__), "data", "_test_file_en.txt") =>
-     (:en,
+     ([Languages.English()],
       ["####_ish", "####_form", "####_metres"],
-      ConceptNet{:en, String, Vector{Float64}})),
+      ConceptNet{Languages.English, String, Vector{Float64}})),
 
     (joinpath(string(@__DIR__), "data", "_test_file.txt") =>
-     (:multi,
-     ["/c/af/1_konings", "/c/af/aaklig", "/c/af/aak"],
-      ConceptNet{:multi, String, Vector{Float64}})),
+     (nothing,
+     ["1_konings", "aaklig", "aak"],
+      ConceptNet{Languages.Language, String, Vector{Float64}})),
 
     (joinpath(string(@__DIR__), "data", "_test_file.h5") =>
-     (:multi_c,
-      ["/c/de/1", "/c/de/2", "/c/de/2d"],
-      ConceptNet{:multi_c, String, Vector{Int8}}))
+     (nothing,
+      ["1", "2", "2d"],
+      ConceptNet{Languages.Language, String, Vector{Int8}}))
    )
 
 @testset "Parser: (no arguments)" begin
-    for (filename, (language, _, resulting_type)) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width = load_embeddings(filename, language=language);
+    for (filename, (languages, _, resulting_type)) in CONCEPTNET_TEST_DATA
+        conceptnet, _len, _width = load_embeddings(filename, languages=languages);
         @test conceptnet isa resulting_type
         @test _len isa Int
-        @test _len == length(conceptnet)
         @test _width isa Int
         @test _width == size(conceptnet, 1)
     end
@@ -37,57 +37,64 @@ end
 
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5" begin
-    for (filename, _) in CONCEPTNET_TEST_DATA
+    for (filename, (languages, _, _)) in CONCEPTNET_TEST_DATA
         conceptnet, _len, _width = load_embeddings(filename,
-                                                   max_vocab_size=max_vocab_size);
+                                                   max_vocab_size=max_vocab_size,
+                                                   languages=languages);
         @test length(conceptnet) == max_vocab_size
     end
 end
 
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5, 3 keep words" begin
-    for (filename, (_, keep_words, _)) in CONCEPTNET_TEST_DATA
+    for (filename, (languages, keep_words, _)) in CONCEPTNET_TEST_DATA
         conceptnet, _len, _width = load_embeddings(filename,
                                                    max_vocab_size=max_vocab_size,
-                                                   keep_words=keep_words)
+                                                   keep_words=keep_words,
+                                                   languages=languages)
         @test length(conceptnet) == length(keep_words)
         for word in keep_words
-            @test word in keys(conceptnet)
+            @test word in conceptnet
         end
     end
 end
 
-@testset "getindex, size, length" begin
+@testset "Indexing" begin
+    # English language
     filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
-    # Known language
-    conceptnet, _, _ = load_embeddings(filepath, language=:en)
+    conceptnet, _, _ = load_embeddings(filepath, languages=[Languages.English()])
     words = ["####_ish", "####_form", "####_metres", "not_found", "not_found2"]
     embeddings = conceptnet[words]
     for (idx, word) in enumerate(words)
-        if word in keys(conceptnet)
-            @test embeddings[:,idx] == conceptnet.embeddings[word]
+        if word in conceptnet
+            @test embeddings[:,idx] == conceptnet.embeddings[Languages.English()][word]
         else
             @test iszero(embeddings[:,idx])
         end
     end
-    # Unknown language
-    conceptnet, _, _ = load_embeddings(filepath)  # unknown language
-    @test_throws ArgumentError conceptnet[words]
-    # length
-    @test length(conceptnet) == length(keys(conceptnet))
-    # size
-    @test size(conceptnet) == (conceptnet.width, length(conceptnet.embeddings))
-    @test size(conceptnet, 1) == conceptnet.width
-    @test size(conceptnet, 2) == length(conceptnet.embeddings)
+    # Multiple languages
+    filepath = joinpath(string(@__DIR__), "data", "_test_file.txt")
+    conceptnet, _, _ = load_embeddings(filepath, languages=nothing)
+    words = ["1_konings", "aaklig", "aak", "maggunfully"]
+    @test_throws MethodError conceptnet[words]
+    for (idx, word) in enumerate(words)
+        @test_throws KeyError conceptnet[Languages.English(), word]
+        if word in conceptnet
+            @test vec(conceptnet[Languages.Dutch(), word]) ==
+                conceptnet.embeddings[Languages.Dutch()][word]
+        else
+            @test iszero(conceptnet[Languages.Dutch(),word])
+        end
+    end
 end
 
 
 # show methods
 @testset "Show methods" begin
     buf = IOBuffer()
-    for (filename, (language, _, _)) in CONCEPTNET_TEST_DATA
+    for (filename, (languages, _, _)) in CONCEPTNET_TEST_DATA
         try
-            conceptnet = load_embeddings(filename, language=language)
+            conceptnet = load_embeddings(filename, languages=languages)
             show(buf, conceptnet)
             @test true
         catch
