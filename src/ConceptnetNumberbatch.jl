@@ -13,6 +13,8 @@ using CodecZlib
 using ProgressMeter
 using HDF5
 using StringDistances
+using Unicode
+using NearestNeighbors
 
 import Base: getindex, size, length, show, keys, values
 
