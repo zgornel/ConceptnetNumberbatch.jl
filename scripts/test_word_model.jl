@@ -10,15 +10,6 @@ fid = open("./_conceptnet_/numberbatch-en-17.06.txt.bin")
 cptnet = deserialize(fid)
 close(fid)
 
-
-
-## Get an embedding matrix
-#phrase = "this is a phrase that containz some iwords"
-#ConceptnetNumberbatch.word_embeddings(cptnet, phrase)
-#@time embs =ConceptnetNumberbatch.word_embeddings(cptnet, phrase)
-#println("Loaded $(size(embs, 2)) embedding vectors of $(size(embs,1)) elements each.") 
-
-
 ## get similar words from NN q-gram model
 dictionary = collect(keys(cptnet))
 @time modelstuff = ConceptnetNumberbatch.build_nn_model(dictionary, ngram_size=2)

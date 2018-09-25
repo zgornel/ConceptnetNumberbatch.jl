@@ -2,16 +2,17 @@
 #TODO(Corneliu) Implement faster fuzzy matcher (i.e. n-gram based/NearestNeighbors)
 
 
-
-function word_embeddings(conceptnet::ConceptNetEnglish,
+function word_embeddings(conceptnet::ConceptNet,
                          phrase::S where S<:AbstractString;
+                         language=Languages.English(),
                          keep_size::Bool=true,
+                         max_length::Int=1,
                          search_mismatches::Bool=true,
-                         distance=Jaro())
-    dictionary = collect(keys(conceptnet))
+                         distance=Levenshtein())
+    dictionary = collect(keys(conceptnet.embeddings[language]))
     tokens = split(phrase)
     sep = "_"
-    found = token_search(tokens, dictionary, sep=sep, max_length=2)
+    found = token_search(tokens, dictionary, sep=sep, max_length=max_length)
     not_found = setdiff(1:length(tokens), found...)
     words = Vector{String}()
     # Get found words
@@ -29,8 +30,7 @@ function word_embeddings(conceptnet::ConceptNetEnglish,
             keep_size && push!(words, tokens[pos])
         end
     end
-    @show words
-    return conceptnet[words]
+    return conceptnet[language, words]
 end
 
 
