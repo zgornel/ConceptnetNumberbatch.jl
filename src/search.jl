@@ -42,24 +42,19 @@ function token_search(tokens, dictionary; sep::String="_", max_length::Int=3)
     n = length(tokens)
     i = 1
     j = n
-    while length(tokens)!=0 && i<=j
-        if i > n || j <=0
-            break
-        elseif j-i+1 > max_length
-            j -=1
+    while i<=n
+        token = join(tokens[i:j], sep, sep)
+        if token in dictionary && j-i+1 <= max_length
+            push!(found, i:j)
+            i=j+1
+            j=n
+            continue
         else
-            tok = join(tokens[i:j], sep)
-            if tok in dictionary
-                push!(found, i:j)
-                i = j+1
-                j = n
-                continue
-            end
-            if i == j
-                i += 1
-                j = n
+            if i==j
+                j=n
+                i+=1
             else
-                j -= 1
+                j-=1
             end
         end
     end
