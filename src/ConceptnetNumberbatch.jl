@@ -18,7 +18,7 @@
 #   - slow for retrieving a mismatch
 #   - could be wrong for mismatches
 #   - retrieval is based on string distances
-#   - decreasing the vocabulary size based on language 
+#   - decreasing the vocabulary size based on language
 #     (i.e. detect the language of the text before
 #     searching) may increase performance significantly at the cost
 #     of more mismatches for rare words

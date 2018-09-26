@@ -33,42 +33,53 @@ show(io::IO, conceptnet::ConceptNetEnglish) =
 
 
 
-# Get index
+# Indexing
+
+# Generic indexing, multiple words
+# Example: julia> conceptnet[Languages.English(), ["another", "word"])
 getindex(conceptnet::ConceptNet{L,K,V}, language::L, words::S) where
-        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}}=
+        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
     hcat((get(conceptnet.embeddings[language],
               word,
               zeros(eltype(V), conceptnet.width))
           for word in words)...
         )::Matrix{eltype(V)}
 
+# Generic indexing, multiple words
+# Example: julia> conceptnet[:en, ["another", "word"]]
 getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, words::S) where
         {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
     conceptnet[LANG_MAP[language], words]
 
-getindex(conceptnet::ConceptNet, language::L, word::S) where
-        {L<:Languages.Language, S<:AbstractString} =
+# Generic indexing, single word
+# Example: julia> conceptnet[Languages.English(), "word"]
+getindex(conceptnet::ConceptNet{L,K,V}, language::L, word::S) where
+        {L<:Language, K, V, S<:AbstractString} =
     conceptnet[language, [word]]
 
+# Generic indexing, single word
+# Example: julia> conceptnet[:en, "word"]
+getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, word::S) where
+        {L<:Language, K, V, S<:AbstractString} =
+    conceptnet[LANG_MAP[language], [word]]
+
+# Single-language indexing: conceptnet[["another", "word"]], if language==Languages.English()
+getindex(conceptnet::ConceptNet{L,K,V}, words::S) where
+        {L<:Languages.Language, K, V, S<:AbstractVector{<:AbstractString}} =
+    conceptnet[L(), words]
+
+# Single-language indexing: conceptnet["word"], if language==Languages.English()
+getindex(conceptnet::ConceptNet{L,K,V}, word::S) where
+        {L<:Languages.Language, K, V, S<:AbstractString} =
+    conceptnet[L(), [word]]
+
+# Index by language (returns a Dict{word=>embedding})
 getindex(conceptnet::ConceptNet, language::L) where {L<:Languages.Language} =
     conceptnet.embeddings[language]
 
+# Index by language (returns a Dict{word=>embedding})
 getindex(conceptnet::ConceptNet, language::Symbol) =
     conceptnet.embeddings[LANG_MAP[language]]
-
-getindex(conceptnet::ConceptNet, language::Symbol, word::S) where
-        {S<:AbstractString} = conceptnet[LANG_MAP[language], word]
-
-getindex(conceptnet::ConceptNetEnglish, word::S) where {S<:AbstractString} =
-    get(conceptnet.embeddings[Languages.English()],
-        word,
-        zeros(conceptnet.width))
-
-getindex(conceptnet::ConceptNetEnglish, words::S) where
-        {S<:Vector{<:AbstractString}} =
-    hcat((get(conceptnet.embeddings[Languages.English()], word,
-              zeros(conceptnet.width))
-          for word in words)...)
 
 
 

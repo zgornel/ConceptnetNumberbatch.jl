@@ -64,6 +64,13 @@ end
     filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
     conceptnet, _, _ = load_embeddings(filepath, languages=[Languages.English()])
     words = ["####_ish", "####_form", "####_metres", "not_found", "not_found2"]
+
+    # Test indexing
+    idx = 1
+    @test conceptnet[words[idx]] == conceptnet[:en, words[idx]] ==
+        conceptnet[Languages.English(), words[idx]]
+
+    # Test values
     embeddings = conceptnet[words]
     for (idx, word) in enumerate(words)
         if word in conceptnet
@@ -72,11 +79,19 @@ end
             @test iszero(embeddings[:,idx])
         end
     end
+
     # Multiple languages
     filepath = joinpath(string(@__DIR__), "data", "_test_file.txt")
     conceptnet, _, _ = load_embeddings(filepath, languages=nothing)
     words = ["1_konings", "aaklig", "aak", "maggunfully"]
-    @test_throws MethodError conceptnet[words]
+
+    # Test indexing
+    @test_throws MethodError conceptnet[words]  # type of language is Language, cannot directly search
+    @test_throws KeyError conceptnet[:en, "word"]  # English language not present
+    @test conceptnet[:nl, words[idx]] ==
+        conceptnet[Languages.Dutch(), words[idx]]
+
+    # Test values
     for (idx, word) in enumerate(words)
         @test_throws KeyError conceptnet[Languages.English(), word]
         if word in conceptnet
