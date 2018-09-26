@@ -19,14 +19,14 @@ TODO
 
 
 
-## Limitations and Caveats
+## Remarks
 
  - pretty fast for retrieving an existing word
  - slow for retrieving a mismatch
  - could be wrong for mismatches
  - retrieval is based on string distances
+ - it is not possible to retrieve embeddings from multiple distinct languages at the same time (in a single indexing operation)
  - decreasing the vocabulary size based on language (i.e. detect the language of the text before searching) may increase performance significantly at the cost of more mismatches for rare words
-
 
 
 ## Installation
