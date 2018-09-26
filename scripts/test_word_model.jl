@@ -3,8 +3,6 @@ Pkg.activate(".")
 using ConceptnetNumberbatch
 using Serialization
 
-local cptnet
-
 # Load a serialized version of ConceptNetEnglish
 fid = open("./_conceptnet_/numberbatch-en-17.06.txt.bin")
 cptnet = deserialize(fid)
