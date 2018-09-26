@@ -10,8 +10,11 @@ ConceptNet(embeddings::Dict{K,V}, width::Int) where
 
 # Aliases
 const ConceptNetMulti = ConceptNet{Language, String, Vector{Float64}}
+
 const ConceptNetMultiCompressed = ConceptNet{Language, String, Vector{Int8}}
+
 const ConceptNetEnglish = ConceptNet{Languages.English, String, Vector{Float64}}
+
 
 
 # Show methods
@@ -34,6 +37,7 @@ end
 
 show(io::IO, conceptnet::ConceptNetEnglish) =
     print(io, "ConceptNet (English): $(length(conceptnet)) embeddings")
+
 
 
 # Get index
@@ -74,6 +78,7 @@ getindex(conceptnet::ConceptNetEnglish, words::S) where
           for word in words)...)
 
 
+
 # length methods
 length(conceptnet::ConceptNet) =
     ifelse(!isempty(conceptnet.embeddings),
@@ -81,10 +86,12 @@ length(conceptnet::ConceptNet) =
            0)
 
 
+
 # size methods
 size(conceptnet::ConceptNet) = (conceptnet.width, length(conceptnet))
 
 size(conceptnet::ConceptNet, inds...) = (conceptnet.width, length(conceptnet))[inds...]
+
 
 
 # in
@@ -102,6 +109,7 @@ end
 function in(lang::L, conceptnet::ConceptNet) where L<:Languages.Language
     return lang in keys(conceptnet.embeddings)
 end
+
 
 
 # Keys

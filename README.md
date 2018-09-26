@@ -11,17 +11,21 @@ An Julia interface to [ConceptNetNumberbatch](https://github.com/commonsense/con
 ## Introduction
 
 This package is a simple API to *ConceptNetNumberbatch*.
-TODO
 
 ## Documentation
 
+There is little documentation available however these examples illustrate some common usage patterns:
 TODO
 
 
 
 ## Limitations and Caveats
 
-TODO
+ - pretty fast for retrieving an existing word
+ - slow for retrieving a mismatch
+ - could be wrong for mismatches
+ - retrieval is based on string distances
+ - decreasing the vocabulary size based on language (i.e. detect the language of the text before searching) may increase performance significantly at the cost of more mismatches for rare words
 
 
 
@@ -30,9 +34,11 @@ TODO
 The installation can be done through the usual channels (manually by cloning the repository or installing it though the julia `REPL`).
 
 
+
 ## Remarks
 
-At this point this is a work in progress and should NOT be used.
+At this point this is a work in progress and should NOT be used. For an alternative to this
+package (with respect to word embeddings), check out [Embeddings.jl](https://github.com/JuliaText/Embeddings.jl)
 
 
 

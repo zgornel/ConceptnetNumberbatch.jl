@@ -1,8 +1,7 @@
-# TODO(Corneliu): Functionality to implement for v0.0.1
-# - converters: (.txt, .gz, .h5) ->
-# - search words (similarity, language filters)
-
-
+"""
+Downloads embeddings given a `url` and saves them to a file
+pointed to by `localfile`.
+"""
 function download_embeddings(;url=CONCEPTNET_EN_LINK,
                              localfile=abspath("./_conceptnet_/" *
                                                split(url,"/")[end]))
@@ -19,7 +18,12 @@ function download_embeddings(;url=CONCEPTNET_EN_LINK,
 end
 
 
-# Function that loads the embeddings given a valid ConceptNetNumberbatch file
+
+"""
+Function that loads the embeddings given a valid ConceptNetNumberbatch `filepath`,
+lading at most `max_vocab_size` embeddings if no specific `keep_words` are
+specified, filtering on `languages`.
+"""
 function load_embeddings(filepath::AbstractString;
                          max_vocab_size::Union{Nothing,Int}=nothing,
                          keep_words=String[],
@@ -48,6 +52,7 @@ function load_embeddings(filepath::AbstractString;
     end
     return conceptnet
 end
+
 
 
 # Loads the ConceptNetNumberbatch from a .gz or uncompressed file
@@ -106,6 +111,7 @@ function _load_gz_embeddings(filepath::S1,
 end
 
 
+
 # Loads the ConceptNetNumberbatch from a HDF5 file
 function _load_hdf5_embeddings(filepath::S1,
                                max_vocab_size::Union{Nothing,Int},
@@ -147,6 +153,7 @@ function _load_hdf5_embeddings(filepath::S1,
 end
 
 
+
 # Function that calculates how many embeddings to retreive
 function _get_vocab_size(real_vocab_size,
                          max_vocab_size=nothing,
@@ -171,6 +178,8 @@ function _get_vocab_size(real_vocab_size,
 end
 
 
+
+# Parse a line
 function _parseline(buf; word_only=false)
     bufvec = split(buf, " ")
     word = string(popfirst!(bufvec))

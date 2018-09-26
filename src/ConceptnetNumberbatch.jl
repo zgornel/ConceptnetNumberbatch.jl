@@ -1,10 +1,27 @@
-# ConceptnetNumberbatch.jl - an interface for ConceptNetNumberbatch
-#   written in Julia by Cornel Cofaru at 0x0α Research, 2018
-#
-# Paper:
-#   Robert Speer, Joshua Chin, and Catherine Havasi (2017).
-#       "ConceptNet 5.5: An Open Multilingual Graph of General Knowledge."
-#       In proceedings of AAAI 2017.
+################################################################################
+# ConceptnetNumberbatch.jl - an interface for ConceptNetNumberbatch            #
+#   written in Julia by Cornel Cofaru at 0x0α Research, 2018                   #
+#                                                                              #
+# Paper:                                                                       #
+#   Robert Speer, Joshua Chin, and Catherine Havasi (2017).                    #
+#       "ConceptNet 5.5: An Open Multilingual Graph of General Knowledge."     #
+#       In proceedings of AAAI 2017.                                           #
+################################################################################
+
+# Remarks:
+#  ####
+# /-----\
+# | O ^ |
+# | \_/ |
+#  \___/
+#   - pretty fast for retrieving an existing word
+#   - slow for retrieving a mismatch
+#   - could be wrong for mismatches
+#   - retrieval is based on string distances
+#   - decreasing the vocabulary size based on language 
+#     (i.e. detect the language of the text before
+#     searching) may increase performance significantly at the cost
+#     of more mismatches for rare words
 
 module ConceptnetNumberbatch
 
@@ -34,7 +51,10 @@ const LANG_MAP = Dict(:en=>Languages.English(),
                       :es=>Languages.Spanish(),
                       :ru=>Languages.Russian(),
                       :ro=>Languages.Romanian(),
-                      :sw=>Languages.Swedish())
+                      :sw=>Languages.Swedish()
+                      # add more mappings here if needed
+                      # AND supported by Languages.jl
+                     )
 
 export CONCEPTNET_MULTI_LINK,
        CONCEPTNET_EN_LINK,
