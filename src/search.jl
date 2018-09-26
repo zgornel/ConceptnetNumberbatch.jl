@@ -1,36 +1,65 @@
-
-function word_embeddings(conceptnet::ConceptNet,
-                         phrase::S where S<:AbstractString;
-                         language=Languages.English(),
-                         keep_size::Bool=true,
-                         max_length::Int=1,
-                         search_mismatches::Bool=true,
-                         distance=Levenshtein())
-    dictionary = collect(keys(conceptnet.embeddings[language]))
-    tokens = split(phrase)
+"""
+Retrieves the embedding matrix for a given `phrase`.
+"""
+function phrase_embeddings(conceptnet::ConceptNet,
+                           phrase::S where S<:AbstractString;
+                           language=Languages.English(),
+                           keep_size::Bool=true,
+                           max_compound_word_length::Int=1,
+                           search_mismatches::Symbol=:no,
+                           show_words::Bool=true,
+                           distance=Levenshtein())
+    # Initializations
     sep = "_"
-    found = token_search(tokens, dictionary, sep=sep, max_length=max_length)
+    tokens = split(phrase)
+    dictionary = collect(keys(conceptnet.embeddings[language]))
+    # Generate positions of words that can be used for indexing (found)
+    # and that can be searched (not_found)
+    found = token_search(tokens,
+                         dictionary,
+                         sep=sep,
+                         max_length=max_compound_word_length)
     not_found = setdiff(1:length(tokens), found...)
-    words = Vector{String}()
     # Get found words
+    words = Vector{String}()
     for pos in found
-        word = join(tokens[pos], sep, sep)
+        word = make_word_from_tokens(tokens, pos, sep, sep)
         push!(words, word)
     end
     # Get best matches for not found words
     for pos in not_found
-        if search_mismatches
-            matcher = word->evaluate(distance, tokens[pos], word)
+        word = make_word_from_tokens(tokens, pos, sep, sep)
+        if search_mismatches == :no
+            # Insert not found words if exact matches are to be
+            # returned only if a matrix of width equal to the
+            # number of terms is to be returned
+            keep_size && push!(words, word)
+        elseif search_mismatches == :brute_force
+            matcher = dict_word->evaluate(distance, word, dict_word)
             _, match_pos = findmin(map(matcher, dictionary))
             push!(words, dictionary[match_pos])
         else
-            keep_size && push!(words, tokens[pos])
+            @warn "The only supported approximate string matching" *
+                  " method is :brute_force. Use :no for skipping the" *
+                  " search; will not search."
+            push!(words, word)
         end
     end
-    @show words
+    # Return
+    show_words && @show words
     return conceptnet[language, words]
 end
 
+
+
+# Small function that builds a compound word
+function make_word_from_tokens(tokens, pos, sep, sep_end)
+    if length(pos) == 1
+        return join(tokens[pos])
+    else
+        return join(tokens[pos], sep, sep_end)
+    end
+end
 
 # Function that searches subphrases (continuous token combinations)
 # from a phrase in a dictionary and returns the positions of matched

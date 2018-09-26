@@ -61,7 +61,7 @@ export CONCEPTNET_MULTI_LINK,
        ConceptNet,
        download_embeddings,
        load_embeddings,
-       word_embeddings
+       phrase_embeddings
 
 include("interface.jl")
 include("files.jl")
