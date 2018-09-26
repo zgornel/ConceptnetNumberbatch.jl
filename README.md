@@ -15,7 +15,7 @@ This package is a simple API to *ConceptNetNumberbatch*.
 ## Documentation
 
 There is little documentation available however these examples illustrate some common usage patterns:
-TODO
+ - TO DO: Add usage examples
 
 
 

@@ -24,12 +24,13 @@
 #     of more mismatches for rare words
 
 module ConceptnetNumberbatch
+
 using TranscodingStreams
 using CodecZlib
 using HDF5
+using Languages
 using StringDistances
 using NearestNeighbors
-using Languages
 
 import Base: getindex, size, length, show, keys, values, in
 
