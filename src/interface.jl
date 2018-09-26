@@ -18,18 +18,13 @@ const ConceptNetEnglish = ConceptNet{Languages.English, String, Vector{Float64}}
 # Show methods
 show(io::IO, conceptnet::ConceptNetMultiCompressed{L}) where {L} = begin
     nlanguages = length(conceptnet.embeddings)
-    if !isempty(conceptnet.embeddings)
-        nembs = mapreduce(x->length(x[2]), +, conceptnet.embeddings)
-    else
-        nembs = 0
-    end
-    print(io, "ConceptNet{$L} (compressed): $nlanguages languages",
+    print(io, "ConceptNet{$L} (compressed): $nlanguages language(s)",
           ", $(length(conceptnet)) embeddings")
 end
 
 show(io::IO, conceptnet::ConceptNetMulti{L}) where {L} = begin
     nlanguages = length(conceptnet.embeddings)
-    print(io, "ConceptNet{$L}: $nlanguages languages",
+    print(io, "ConceptNet{$L}: $nlanguages language(s)",
           ", $(length(conceptnet)) embeddings")
 end
 
@@ -78,10 +73,13 @@ getindex(conceptnet::ConceptNetEnglish, words::S) where
 
 
 # length methods
-length(conceptnet::ConceptNet) =
-    ifelse(!isempty(conceptnet.embeddings),
-           mapreduce(x->length(x[2]), +, conceptnet.embeddings),
-           0)
+length(conceptnet::ConceptNet) = begin
+    if !isempty(conceptnet.embeddings)
+        return mapreduce(x->length(x[2]), +, conceptnet.embeddings)
+    else
+        return 0
+    end
+end
 
 
 

@@ -24,7 +24,6 @@
 #     of more mismatches for rare words
 
 module ConceptnetNumberbatch
-
 using TranscodingStreams
 using CodecZlib
 using HDF5

@@ -130,7 +130,7 @@ function _load_hdf5_embeddings(filepath::S1,
     vocab_size = _get_vocab_size(length(words),
                                  max_vocab_size,
                                  keep_words)
-    lang_embs, languages, _, _ =
+    lang_embs, languages, type_lang, _ =
         process_language_argument(languages, type_word, type_vector)
     no_custom_words = length(keep_words)==0
     cnt = 0
@@ -151,7 +151,7 @@ function _load_hdf5_embeddings(filepath::S1,
     end
     _length::Int = length(words)
     _width::Int = size(embeddings,1)
-    return ConceptNet{Languages.Language, type_word, type_vector}(lang_embs, _width), _length, _width
+    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, _width), _length, _width
 end
 
 
