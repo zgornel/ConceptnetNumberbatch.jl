@@ -9,34 +9,32 @@ ConceptNet(embeddings::Dict{K,V}, width::Int) where
 
 
 # Aliases
-const ConceptNetMulti = ConceptNet{Language, String, Vector{Float64}}
-
-const ConceptNetMultiCompressed = ConceptNet{Language, String, Vector{Int8}}
-
+const ConceptNetMulti{L} = ConceptNet{L, String, Vector{Float64}}
+const ConceptNetMultiCompressed{L} = ConceptNet{L, String, Vector{Int8}}
 const ConceptNetEnglish = ConceptNet{Languages.English, String, Vector{Float64}}
 
 
 
 # Show methods
-show(io::IO, conceptnet::ConceptNetMultiCompressed) = begin
+show(io::IO, conceptnet::ConceptNetMultiCompressed{L}) where {L} = begin
     nlanguages = length(conceptnet.embeddings)
     if !isempty(conceptnet.embeddings)
         nembs = mapreduce(x->length(x[2]), +, conceptnet.embeddings)
     else
         nembs = 0
     end
-    print(io, "ConceptNet (compressed): $nlanguages languages",
+    print(io, "ConceptNet{$L} (compressed): $nlanguages languages",
           ", $(length(conceptnet)) embeddings")
 end
 
-show(io::IO, conceptnet::ConceptNetMulti) = begin
+show(io::IO, conceptnet::ConceptNetMulti{L}) where {L} = begin
     nlanguages = length(conceptnet.embeddings)
-    print(io, "ConceptNet (multilanguage): $nlanguages languages",
+    print(io, "ConceptNet{$L}: $nlanguages languages",
           ", $(length(conceptnet)) embeddings")
 end
 
 show(io::IO, conceptnet::ConceptNetEnglish) =
-    print(io, "ConceptNet (English): $(length(conceptnet)) embeddings")
+    print(io, "ConceptNet{English}: $(length(conceptnet)) embeddings")
 
 
 
