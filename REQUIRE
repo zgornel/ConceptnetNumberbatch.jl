@@ -1,1 +1,7 @@
 julia 0.7
+TranscodingStreams
+CodecZlib
+HDF5
+Languages
+StringDistances
+NearestNeighbors
