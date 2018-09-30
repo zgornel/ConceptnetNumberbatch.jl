@@ -18,17 +18,18 @@ This package is a simple API to **ConceptNetNumberbatch**.
 
 The following examples illustrate some common usage patterns:
 
-```julia>
+```julia
 julia> using Conceptnet, Languages
-	   path_h5 = download_embeddings(url=CONCEPTNET_HDF5_LINK, localfile="./_conceptnet_/conceptnet.h5");
+       file_conceptnet = download_embeddings(url=CONCEPTNET_HDF5_LINK,
+                                             localfile="./_conceptnet_/conceptnet.h5");
 # [ Info: Download ConceptNetNumberbatch to ./_conceptnet_/conceptnet.h5...
 #   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
 #                                  Dload  Upload   Total   Spent    Left  Speed
 # 100  127M  100  127M    0     0  3646k      0  0:00:35  0:00:35 --:--:-- 4107k
-"./_conceptnet_/conceptnet.h5"
+# "./_conceptnet_/conceptnet.h5"
 
 # Load embeddings
-julia> conceptnet = load_embeddings(path_h5, languages=[Languages.English()])
+julia> conceptnet = load_embeddings(file_conceptnet, languages=:en)
 # ConceptNet{Languages.English} (compressed): 1 language(s), 150875 embeddings
 
 julia> conceptnet["apple"]  # Get embeddings for a single word
@@ -50,13 +51,13 @@ julia> conceptnet[["apple", "pear", "cherry"]]  # Get embeddings for multiple wo
 
 ```julia
 # Load multiple languages
-julia> conceptnet = load_embeddings(path_h5, languages=[Languages.English(), Languages.French()])
+julia> conceptnet = load_embeddings(file_conceptnet, languages=[:en, :fr])
 # ConceptNet{Language} (compressed): 2 language(s), 174184 embeddings
 
 julia> conceptnet["apple"]  # fails, language must be specified
 # ERROR: ...
 
-julia> [conceptnet[:en, "apple"] conceptnet[:fr, "poire"]]  # languages can be specified also as Languages.English(), Languages.French()
+julia> [conceptnet[:en, "apple"] conceptnet[:fr, "poire"]]
 # 300×2 Array{Int8,2}:
 #   0   -2
 #   0   -2
@@ -103,7 +104,7 @@ julia> # `keys` returns an iterator for all words
  - fast for retrieving embeddings of exact matches
  - fast for retrieving embeddings of wildcard matches (`xyzabcish` is matched to `######ish`)
  - if neither exact or wildcard matches exist, retrieval can be based on string distances (slow, see `src/search.jl`)
-
+ - for another package handling word embeddings, check out [Embeddings.jl](https://github.com/JuliaText/Embeddings.jl)
 
 
 ## Installation
@@ -121,5 +122,7 @@ This code has an MIT license and therefore it is free.
 ## References
 
 [1] [ConceptNetNumberbatch GitHub homepage](https://github.com/commonsense/conceptnet-numberbatch)
+
 [2] [ConceptNet GitHub homepage](https://github.com/commonsense/conceptnet5)
-[3] [Embeddings.jl - another embeddings package](https://github.com/JuliaText/Embeddings.jl)
+
+[3] [Embeddings.jl GitHub homepage](https://github.com/JuliaText/Embeddings.jl)

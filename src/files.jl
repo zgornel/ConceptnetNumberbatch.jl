@@ -29,10 +29,16 @@ function load_embeddings(filepath::AbstractString;
                          keep_words=String[],
                          languages::Union{Nothing,
                                           Languages.Language,
-                                          Vector{<:Languages.Language}
+                                          Vector{<:Languages.Language},
+                                          Symbol,
+                                          Vector{Symbol}
                                          }=nothing)
-    if languages == nothing
+    if languages isa Nothing
         languages = unique(collect(values(LANGUAGES)))
+    elseif languages isa Symbol
+        languages = LANGUAGES[languages]
+    elseif languages isa Vector{Symbol}
+        languages = [LANGUAGES[lang] for lang in languages]
     end
 
     if any(endswith.(filepath, [".gz", ".gzip"]))
