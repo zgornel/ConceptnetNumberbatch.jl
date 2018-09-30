@@ -10,7 +10,9 @@ An Julia interface to [ConceptNetNumberbatch](https://github.com/commonsense/con
 
 ## Introduction
 
-This package is a simple API to *ConceptNetNumberbatch*.
+This package is a simple API to **ConceptNetNumberbatch**.
+
+
 
 ## Documentation
 
@@ -73,6 +75,26 @@ julia> conceptnet[:en, "xxyyzish"]  # returns embedding for "#####ish"
 ```
 
 ```julia
+# Useful functions
+julia> length(conceptnet)  # total number of embeddings for all languages
+# 174184
+
+julia> size(conceptnet)  # embedding vector length, number of embeddings
+# (300, 174184)
+
+julia> "apple" in conceptnet  # found in the English embeddings
+# true
+
+julia> "poire" in conceptnet  # found in the French embeddings
+# true
+
+julia> # `keys` returns an iterator for all words
+       for word in Iterators.take(keys(conceptnet),3)
+           println(word)
+       end
+# définie
+# invités
+# couvents
 ```
 
 
@@ -81,8 +103,7 @@ julia> conceptnet[:en, "xxyyzish"]  # returns embedding for "#####ish"
  - fast for retrieving embeddings of exact matches
  - fast for retrieving embeddings of wildcard matches (`xyzabcish` is matched to `######ish`)
  - if neither exact or wildcard matches exist, retrieval can be based on string distances (slow, see `src/search.jl`)
- - it is not possible to retrieve embeddings from multiple distinct languages at the same time (in a single indexing operation)
- - decreasing the vocabulary size based on language (i.e. detect the language of the text before searching) may increase performance significantly at the cost of more mismatches for rare words
+
 
 
 ## Installation

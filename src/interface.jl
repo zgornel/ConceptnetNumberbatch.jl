@@ -45,7 +45,7 @@ function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K})
         return embeddings[keyword]
     else
         # The keyword is not found; try fuzzy matching
-        w = 0.4 # weight assinged to matching a #, 1-w weight assigned to a matching letter
+        ω = 0.4 # weight assinged to matching a #, 1-w weight assigned to a matching letter
         L = length(keyword)
         matches = (word for word in fuzzy_words
                    if length(word) == L &&
@@ -56,8 +56,8 @@ function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K})
             best_match = ""
             max_score = 0
             for match in matches
-                ll = length(replace(match,"#"=>"")) # number of letters matched
-                score = w*(L-ll)/L + (1-w)*ll/L
+                l = length(replace(match,"#"=>"")) # number of letters matched
+                score = ω*(L-l)/L + (1-ω)*l/L
                 if score > max_score
                     best_match = match
                     max_score = score

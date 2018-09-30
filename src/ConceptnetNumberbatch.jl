@@ -11,21 +11,12 @@
 # NKOkk0KK0OkMMMMMMWd;:kWMWXX0kdo;'OMMMMMMM0cNMKlloMNlxXOckMkcWMxcMMdlMXcxXOcKNlxXXKWNcOMMMllKKlxMloX0cOM0c0XMooKXKMdoM
 # MMMMWX0kdl:0MMMMX;'lWMMMMMMWk;'0XWMMMMMMMN0WMMX0KMMX00XKXMX0WMX0MMKKMW0N00XMMWK00KMW0XMMMKXK0KWMX00NKXMWK00MWK00XMKKM
 # MMMMMMMMMMMWOOoc'o0KWMMMMMMMMWK0MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-#                                                                                                                     #
-# ConceptnetNumberbatch.jl - an interface for ConceptNetNumberbatch written in Julia at 0x0α Research, 2018           #
-# Paper:                                                                                                              #
-#   Robert Speer, Joshua Chin, and Catherine Havasi (2017).                                                           #
-#       "ConceptNet 5.5: An Open Multilingual Graph of General Knowledge." in proceedings of AAAI 2017.               #
-#######################################################################################################################
-# General remarks:
-#   - pretty fast for retrieving an existing word
-#   - slow for retrieving a mismatch
-#   - could be wrong for mismatches
-#   - retrieval is based on string distances
-#   - decreasing the vocabulary size based on language
-#     (i.e. detect the language of the text before
-#     searching) may increase performance significantly at the cost
-#     of more mismatches for rare words
+
+# ConceptnetNumberbatch.jl - an interface for ConceptNetNumberbatch written in Julia at 0x0α Research,
+#                            by Corneliu Cofaru, 2018
+# Paper:
+#   Robert Speer, Joshua Chin, and Catherine Havasi (2017).
+#       "ConceptNet 5.5: An Open Multilingual Graph of General Knowledge." in proceedings of AAAI 2017.
 
 module ConceptnetNumberbatch
 
