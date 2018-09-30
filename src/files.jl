@@ -5,8 +5,8 @@ pointed to by `localfile`.
 function download_embeddings(;url=CONCEPTNET_EN_LINK,
                              localfile=abspath("./_conceptnet_/" *
                                                split(url,"/")[end]))
-    _dir = join(split(localfile, "/")[1:end-1], "/")
-    !isempty(_dir) && !isdir(_dir) && mkpath(_dir)
+    directory = join(split(localfile, "/")[1:end-1], "/")
+    !isempty(directory) && !isdir(directory) && mkpath(directory)
     @info "Download ConceptNetNumberbatch to $localfile..."
     if !isfile(localfile)
         download(url, localfile)

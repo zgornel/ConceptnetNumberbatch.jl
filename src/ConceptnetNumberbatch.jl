@@ -1,19 +1,23 @@
-################################################################################
-# ConceptnetNumberbatch.jl - an interface for ConceptNetNumberbatch            #
-#   written in Julia by Cornel Cofaru at 0x0α Research, 2018                   #
-#                                                                              #
-# Paper:                                                                       #
-#   Robert Speer, Joshua Chin, and Catherine Havasi (2017).                    #
-#       "ConceptNet 5.5: An Open Multilingual Graph of General Knowledge."     #
-#       In proceedings of AAAI 2017.                                           #
-################################################################################
-
-# Remarks:
-#  ####
-# /-----\
-# | O ^ |
-# | \_/ |
-#  \___/
+# MMMMMMMMMMMMMMMMMMMMMMMMMMMWNNKN0KMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+# MMMMMMMMMMMMMMMMMMMMMMMMMW0OMMMMX0MMMMMMMMMMXXNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNWMMMMNMMMMMMMMMMMMMMMMMMMMMMMM
+# MMMMMMMMMMMMMMMMMMMMMMMMMKMMMMMOKWMMMMMMMN:lkkdXMMNXWMMMWMNNMMMMWXWMMMNNMMMWMNNMMMlXWM;.xMMW.MMMWXWMM0dWWMMMMMMMMMMMM
+# MMMMMMMMMMMMMMMMMMMMMMMMNXMMMMMXXMMMMMMMM:oMMMMMX,xkl:MK.xkd'MN,dkxMx:Ox,NW dkd'N0 xOM;OccWW.MW;dOcoN:;kNMMMMMMMMMMMM
+# MMMMMMMMMMMMMMMMMMWXXXXXkMMMMMMM0MMMMMMMM:lMMMMMocMMM.XK.MMM Mk;MMMM.lxxlKM MMM;xM.NMM;OMk,X.MO.xxdoMolMMMMMMMMMMMMMM
+# MMMMMMMMMMMMMMXXXXNMMMMMoMMMMMMMOMMMMMMMMW:cdxdWN;dxlcMK.MMM MW;oxdMk;dxdWM dxo,NM;lkM;OMMX'.MW:oxd0MO'xXMMMMMMMMMMMM
+# MMMMMMMMMMMMXXWMMMMMMMMM0KMMMMMOOMMMMMMMMMMMWWMMMMMWMMMMMMMMMMMMMWMMMMWWMMM MWWMMMMWWMMMMMMMMMMMMWWMMMMWMMMMMMMMMMMMM
+# MMMMMMMMMMW0WMMMMMMMMMMMMNMMMM0:WMMMMMMMMXxxNMM0kMMMMMMMMMMMMMMMMMMMMXl0MMMxMMMMMMMMMMMMModMMMMMMMMMMMMW0WMMMMMMMMdoM
+# MMMMMMMMMM0MMMMMMMMMMMMMMMMMMk'0MMMMMMMMM0cxlXMxoMNxKMWd0M0xOxdOkxd0MXcxkdkWM0xkx0MNd0xxMlokdxNMNxkxkNNxcxkMXxxxOMdlk
+# MMMMMMMMMMKMMMMMMMMMNK0XNMMMM:'OWMMMMMMMM0cNOlKkoMXcOMWckMkcXMxcNMdlMXcOMXcOXcdOxcKNcxWMMloMWooMN0OkcOMOcNMWldMMMMdlW
+# NKOkk0KK0OkMMMMMMWd;:kWMWXX0kdo;'OMMMMMMM0cNMKlloMNlxXOckMkcWMxcMMdlMXcxXOcKNlxXXKWNcOMMMllKKlxMloX0cOM0c0XMooKXKMdoM
+# MMMMWX0kdl:0MMMMX;'lWMMMMMMWk;'0XWMMMMMMMN0WMMX0KMMX00XKXMX0WMX0MMKKMW0N00XMMWK00KMW0XMMMKXK0KWMX00NKXMWK00MWK00XMKKM
+# MMMMMMMMMMMWOOoc'o0KWMMMMMMMMWK0MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+#                                                                                                                     #
+# ConceptnetNumberbatch.jl - an interface for ConceptNetNumberbatch written in Julia at 0x0α Research, 2018           #
+# Paper:                                                                                                              #
+#   Robert Speer, Joshua Chin, and Catherine Havasi (2017).                                                           #
+#       "ConceptNet 5.5: An Open Multilingual Graph of General Knowledge." in proceedings of AAAI 2017.               #
+#######################################################################################################################
+# General remarks:
 #   - pretty fast for retrieving an existing word
 #   - slow for retrieving a mismatch
 #   - could be wrong for mismatches

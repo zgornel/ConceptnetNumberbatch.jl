@@ -86,19 +86,19 @@ function token_search(tokens, dictionary; sep::String="_", max_length::Int=3)
     n = length(tokens)
     i = 1
     j = n
-    while i<=n
+    while i <= n
         token = join(tokens[i:j], sep, sep)
         if token in dictionary && j-i+1 <= max_length
             push!(found, i:j)
-            i=j+1
-            j=n
+            i = j + 1
+            j = n
             continue
         else
-            if i==j
-                j=n
-                i+=1
+            if i == j
+                j = n
+                i+= 1
             else
-                j-=1
+                j-= 1
             end
         end
     end
