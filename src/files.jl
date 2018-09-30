@@ -32,7 +32,7 @@ function load_embeddings(filepath::AbstractString;
                                           Vector{<:Languages.Language}
                                          }=nothing)
     if languages == nothing
-        languages = unique(collect(values(LANG_MAP)))
+        languages = unique(collect(values(LANGUAGES)))
     end
 
     if any(endswith.(filepath, [".gz", ".gzip"]))
@@ -89,8 +89,8 @@ function _load_gz_embeddings(filepath::S1,
                 lang = Symbol(_lang)
             end
             if word in keep_words || no_custom_words
-                if lang in keys(LANG_MAP) && LANG_MAP[lang] in languages  # use only languages mapped in LANG_MAP
-                    _llang = LANG_MAP[lang]
+                if lang in keys(LANGUAGES) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
+                    _llang = LANGUAGES[lang]
                     if !(_llang in keys(lang_embs))
                         push!(lang_embs, _llang=>Dict{type_word, type_vector}())
                     end
@@ -136,8 +136,8 @@ function _load_hdf5_embeddings(filepath::S1,
     cnt = 0
     for (idx, (lang, word)) in enumerate(words)
         if word in keep_words || no_custom_words
-            if lang in keys(LANG_MAP) && LANG_MAP[lang] in languages  # use only languages mapped in LANG_MAP
-                _llang = LANG_MAP[lang]
+            if lang in keys(LANGUAGES) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
+                _llang = LANGUAGES[lang]
                 if !(_llang in keys(lang_embs))
                     push!(lang_embs, _llang=>Dict{type_word, type_vector}())
                 end
@@ -167,7 +167,7 @@ function process_language_argument(languages::Nothing,
                                    type_word::T1,
                                    type_vector::T2) where {T1, T2}
     return Dict{Languages.Language, Dict{type_word, type_vector}}(),
-           collect(language for language in LANG_MAP),
+           collect(language for language in LANGUAGES),
            Languages.Language, false
 end
 

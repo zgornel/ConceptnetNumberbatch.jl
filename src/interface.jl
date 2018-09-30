@@ -49,7 +49,7 @@ getindex(conceptnet::ConceptNet{L,K,V}, language::L, words::S) where
 # Example: julia> conceptnet[:en, ["another", "word"]]
 getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, words::S) where
         {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
-    conceptnet[LANG_MAP[language], words]
+    conceptnet[LANGUAGES[language], words]
 
 # Generic indexing, single word
 # Example: julia> conceptnet[Languages.English(), "word"]
@@ -61,7 +61,7 @@ getindex(conceptnet::ConceptNet{L,K,V}, language::L, word::S) where
 # Example: julia> conceptnet[:en, "word"]
 getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, word::S) where
         {L<:Language, K, V, S<:AbstractString} =
-    conceptnet[LANG_MAP[language], [word]]
+    conceptnet[LANGUAGES[language], [word]]
 
 # Single-language indexing: conceptnet[["another", "word"]], if language==Languages.English()
 getindex(conceptnet::ConceptNet{L,K,V}, words::S) where
@@ -79,7 +79,7 @@ getindex(conceptnet::ConceptNet, language::L) where {L<:Languages.Language} =
 
 # Index by language (returns a Dict{word=>embedding})
 getindex(conceptnet::ConceptNet, language::Symbol) =
-    conceptnet.embeddings[LANG_MAP[language]]
+    conceptnet.embeddings[LANGUAGES[language]]
 
 
 

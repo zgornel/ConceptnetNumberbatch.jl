@@ -44,21 +44,51 @@ const CONCEPTNET_EN_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/n
 const CONCEPTNET_HDF5_LINK = "https://conceptnet.s3.amazonaws.com/precomputed-data/2016/numberbatch/17.06/mini.h5"
 
 # Accepted languages (map from conceptnet to Languages.Language)
-const LANG_MAP = Dict(:en=>Languages.English(),
-                      :fr=>Languages.French(),
-                      :de=>Languages.German(),
-                      :it=>Languages.Italian(),
-                      :fi=>Languages.Finnish(),
-                      :nl=>Languages.Dutch(),
-                      :af=>Languages.Dutch(),
-                      :pt=>Languages.Portuguese(),
-                      :es=>Languages.Spanish(),
-                      :ru=>Languages.Russian(),
-                      :ro=>Languages.Romanian(),
-                      :sw=>Languages.Swedish()
-                      # add more mappings here if needed
-                      # AND supported by Languages.jl
-                     )
+const LANGUAGES = Dict(:en=>Languages.English(),
+                       :fr=>Languages.French(),
+                       :de=>Languages.German(),
+                       :it=>Languages.Italian(),
+                       :fi=>Languages.Finnish(),
+                       :nl=>Languages.Dutch(),
+                       :af=>Languages.Dutch(),
+                       :pt=>Languages.Portuguese(),
+                       :es=>Languages.Spanish(),
+                       :ru=>Languages.Russian(),
+                       :sh=>Languages.Serbian(),# and Languages.Croatian()
+                       :sw=>Languages.Swedish(),
+                       :cs=>Languages.Czech(),
+                       :pl=>Languages.Polish(),
+                       :bg=>Languages.Bulgarian(),
+                       :eo=>Languages.Esperanto(),
+                       :hu=>Languages.Hungarian(),
+                       :el=>Languages.Greek(),
+                       :no=>Languages.Nynorsk(),
+                       :sl=>Languages.Slovene(),
+                       :ro=>Languages.Romanian(),
+                       :vi=>Languages.Vietnamese(),
+                       :lv=>Languages.Latvian(),
+                       :tr=>Languages.Turkish(),
+                       :da=>Languages.Danish(),
+                       :ar=>Languages.Arabic(),
+                       :fa=>Languages.Persian(),
+                       :ko=>Languages.Korean(),
+                       :th=>Languages.Thai(),
+                       :ka=>Languages.Georgian(),
+                       :he=>Languages.Hebrew(),
+                       :te=>Languages.Telugu(),
+                       :et=>Languages.Estonian(),
+                       :hi=>Languages.Hindi(),
+                       :lt=>Languages.Lithuanian(),
+                       :uk=>Languages.Ukranian(),
+                       :be=>Languages.Belarusian(),
+                       :sw=>Languages.Swahili(),
+                       :ur=>Languages.Urdu(),
+                       :ku=>Languages.Kurdish(),
+                       :az=>Languages.Azerbaijani(),
+                       :ta=>Languages.Tamil()
+                       # add more mappings here if needed
+                       # AND supported by Languages.jl
+                      )
 
 export CONCEPTNET_MULTI_LINK,
        CONCEPTNET_EN_LINK,
