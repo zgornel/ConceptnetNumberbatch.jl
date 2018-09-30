@@ -68,7 +68,7 @@ function _load_gz_embeddings(filepath::S1,
                                               Vector{<:Languages.Language}
                                              }=nothing) where
         {S1<:AbstractString, S2<:AbstractString}
-    local lang_embs, _length::Int, _width::Int, type_lang
+    local lang_embs, _length::Int, type_lang, fuzzy_words
     type_word = String
     type_vector = Vector{Float64}
     open(filepath, "r") do fid
@@ -93,8 +93,10 @@ function _load_gz_embeddings(filepath::S1,
                     _llang = LANGUAGES[lang]
                     if !(_llang in keys(lang_embs))
                         push!(lang_embs, _llang=>Dict{type_word, type_vector}())
+                        fuzzy_words = Dict{type_lang, Vector{type_word}}(_llang=>type_word[])
                     end
                     _, embedding = _parseline(line, word_only=false)
+                    occursin("#", word) && push!(fuzzy_words[_llang], word)
                     push!(lang_embs[_llang], word=>embedding)
                     cnt+=1
                     if cnt > vocab_size-1
@@ -105,7 +107,7 @@ function _load_gz_embeddings(filepath::S1,
         end
         close(cfid)
     end
-    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, _width), _length, _width
+    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, _width, fuzzy_words)
 end
 
 
@@ -119,6 +121,7 @@ function _load_hdf5_embeddings(filepath::S1,
                                                 Vector{<:Languages.Language}
                                                }=nothing) where
         {S1<:AbstractString, S2<:AbstractString}
+    local fuzzy_words
     type_word = String
     type_vector = Vector{Int8}
     payload = h5open(read, filepath)["mat"]
@@ -140,7 +143,9 @@ function _load_hdf5_embeddings(filepath::S1,
                 _llang = LANGUAGES[lang]
                 if !(_llang in keys(lang_embs))
                     push!(lang_embs, _llang=>Dict{type_word, type_vector}())
+                    fuzzy_words = Dict{type_lang, Vector{type_word}}(_llang=>type_word[])
                 end
+                occursin("#", word) && push!(fuzzy_words[_llang], word)
                 push!(lang_embs[_llang], word=>embeddings[:,idx])
                 cnt+=1
                 if cnt > vocab_size-1
@@ -149,9 +154,7 @@ function _load_hdf5_embeddings(filepath::S1,
             end
         end
     end
-    _length::Int = length(words)
-    _width::Int = size(embeddings,1)
-    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, _width), _length, _width
+    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, size(embeddings,1), fuzzy_words)
 end
 
 

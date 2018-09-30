@@ -36,7 +36,7 @@ using Languages
 using StringDistances
 using NearestNeighbors
 
-import Base: getindex, size, length, show, keys, values, in
+import Base: get, getindex, size, length, show, keys, values, in
 
 # Links pointing to the latest ConceptNetNumberbatch version (v"17.06")
 const CONCEPTNET_MULTI_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-17.06.txt.gz"
@@ -79,7 +79,7 @@ const LANGUAGES = Dict(:en=>Languages.English(),
                        :et=>Languages.Estonian(),
                        :hi=>Languages.Hindi(),
                        :lt=>Languages.Lithuanian(),
-                       :uk=>Languages.Ukranian(),
+                       :uk=>Languages.Ukrainian(),
                        :be=>Languages.Belarusian(),
                        :sw=>Languages.Swahili(),
                        :ur=>Languages.Urdu(),
