@@ -63,7 +63,6 @@ function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K})
                     max_score = score
                 end
             end
-            @show best_match
             return embeddings[best_match]
         end
     end

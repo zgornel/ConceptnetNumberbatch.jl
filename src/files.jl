@@ -68,7 +68,7 @@ function _load_gz_embeddings(filepath::S1,
                                               Vector{<:Languages.Language}
                                              }=nothing) where
         {S1<:AbstractString, S2<:AbstractString}
-    local lang_embs, _length::Int, type_lang, fuzzy_words
+    local lang_embs, _length::Int, _width::Int, type_lang, fuzzy_words
     type_word = String
     type_vector = Vector{Float64}
     open(filepath, "r") do fid

@@ -27,20 +27,16 @@ const CONCEPTNET_TEST_DATA = Dict(  # filename => output type
 
 @testset "Parser: (no arguments)" begin
     for (filename, (languages, _, resulting_type)) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width = load_embeddings(filename, languages=languages);
+        conceptnet = load_embeddings(filename, languages=languages);
         @test conceptnet isa resulting_type
-        @test _len isa Int
-        @test _width isa Int
-        @test _width == size(conceptnet, 1)
     end
 end
 
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5" begin
     for (filename, (languages, _, _)) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width = load_embeddings(filename,
-                                                   max_vocab_size=max_vocab_size,
-                                                   languages=languages);
+        conceptnet = load_embeddings(filename, max_vocab_size=max_vocab_size,
+                                     languages=languages);
         @test length(conceptnet) == max_vocab_size
     end
 end
@@ -48,10 +44,8 @@ end
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5, 3 keep words" begin
     for (filename, (languages, keep_words, _)) in CONCEPTNET_TEST_DATA
-        conceptnet, _len, _width = load_embeddings(filename,
-                                                   max_vocab_size=max_vocab_size,
-                                                   keep_words=keep_words,
-                                                   languages=languages)
+        conceptnet = load_embeddings(filename, max_vocab_size=max_vocab_size,
+                                     keep_words=keep_words, languages=languages)
         @test length(conceptnet) == length(keep_words)
         for word in keep_words
             @test word in conceptnet
@@ -62,7 +56,7 @@ end
 @testset "Indexing" begin
     # English language
     filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
-    conceptnet, _, _ = load_embeddings(filepath, languages=[Languages.English()])
+    conceptnet = load_embeddings(filepath, languages=[Languages.English()])
     words = ["####_ish", "####_form", "####_metres", "not_found", "not_found2"]
 
     # Test indexing
@@ -82,7 +76,7 @@ end
 
     # Multiple languages
     filepath = joinpath(string(@__DIR__), "data", "_test_file.txt")
-    conceptnet, _, _ = load_embeddings(filepath, languages=nothing)
+    conceptnet = load_embeddings(filepath, languages=nothing)
     words = ["1_konings", "aaklig", "aak", "maggunfully"]
 
     # Test indexing
@@ -103,6 +97,17 @@ end
     end
 end
 
+@testset "Fuzzy Indexing" begin
+    filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
+    conceptnet = load_embeddings(filepath, languages=[Languages.English()])
+    words_and_matches = Dict("aq" => "##",
+                             "p'"=>"##",
+                             "ab," =>"###",
+                             "ddsaw_metres"=>"#####_metres")
+    for (word, matching_word) in words_and_matches
+        @test conceptnet[word] == conceptnet[matching_word]
+    end
+end
 
 # show methods
 @testset "Show methods" begin
