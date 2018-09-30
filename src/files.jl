@@ -79,6 +79,7 @@ function _load_gz_embeddings(filepath::S1,
                                      keep_words)
         lang_embs, languages, type_lang, english_only =
             process_language_argument(languages, type_word, type_vector)
+		fuzzy_words = Dict{type_lang, Vector{type_word}}()
         no_custom_words = length(keep_words)==0
         lang = :en
         cnt = 0
@@ -93,7 +94,7 @@ function _load_gz_embeddings(filepath::S1,
                     _llang = LANGUAGES[lang]
                     if !(_llang in keys(lang_embs))
                         push!(lang_embs, _llang=>Dict{type_word, type_vector}())
-                        fuzzy_words = Dict{type_lang, Vector{type_word}}(_llang=>type_word[])
+                        push!(fuzzy_words, _llang=>type_word[])
                     end
                     _, embedding = _parseline(line, word_only=false)
                     occursin("#", word) && push!(fuzzy_words[_llang], word)
@@ -135,6 +136,7 @@ function _load_hdf5_embeddings(filepath::S1,
                                  keep_words)
     lang_embs, languages, type_lang, _ =
         process_language_argument(languages, type_word, type_vector)
+	fuzzy_words = Dict{type_lang, Vector{type_word}}()
     no_custom_words = length(keep_words)==0
     cnt = 0
     for (idx, (lang, word)) in enumerate(words)
@@ -143,7 +145,7 @@ function _load_hdf5_embeddings(filepath::S1,
                 _llang = LANGUAGES[lang]
                 if !(_llang in keys(lang_embs))
                     push!(lang_embs, _llang=>Dict{type_word, type_vector}())
-                    fuzzy_words = Dict{type_lang, Vector{type_word}}(_llang=>type_word[])
+                    push!(fuzzy_words, _llang=>type_word[])
                 end
                 occursin("#", word) && push!(fuzzy_words[_llang], word)
                 push!(lang_embs[_llang], word=>embeddings[:,idx])
