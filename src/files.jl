@@ -98,7 +98,7 @@ function _load_gz_embeddings(filepath::S1,
             if word in keep_words || no_custom_words
                 if lang in keys(LANGUAGES) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
                     _llang = LANGUAGES[lang]
-                    if !(_llang in keys(lang_embs))
+                    if !haskey(lang_embs, _llang)
                         push!(lang_embs, _llang=>Dict{type_word, type_vector}())
                         push!(fuzzy_words, _llang=>type_word[])
                     end
@@ -147,9 +147,9 @@ function _load_hdf5_embeddings(filepath::S1,
     cnt = 0
     for (idx, (lang, word)) in enumerate(words)
         if word in keep_words || no_custom_words
-            if lang in keys(LANGUAGES) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
+            if haskey(LANGUAGES, lang) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
                 _llang = LANGUAGES[lang]
-                if !(_llang in keys(lang_embs))
+                if !haskey(lang_embs, _llang)
                     push!(lang_embs, _llang=>Dict{type_word, type_vector}())
                     push!(fuzzy_words, _llang=>type_word[])
                 end

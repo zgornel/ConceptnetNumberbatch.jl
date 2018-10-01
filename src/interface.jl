@@ -142,7 +142,7 @@ size(conceptnet::ConceptNet, inds...) = (conceptnet.width, length(conceptnet))[i
 function in(key::S, conceptnet::ConceptNet) where S<:AbstractString
     found = false
     for lang in keys(conceptnet.embeddings)
-        if key in keys(conceptnet.embeddings[lang])
+        if haskey(conceptnet.embeddings[lang], key)
             found = true
             break
         end
@@ -151,7 +151,7 @@ function in(key::S, conceptnet::ConceptNet) where S<:AbstractString
 end
 
 function in(lang::L, conceptnet::ConceptNet) where L<:Languages.Language
-    return lang in keys(conceptnet.embeddings)
+    return haskey(conceptnet.embeddings, lang)
 end
 
 
