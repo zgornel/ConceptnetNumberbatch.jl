@@ -11,38 +11,46 @@ function phrase_embeddings(conceptnet::ConceptNet,
                            distance=Levenshtein())
     # Initializations
     sep = "_"
-    tokens = split(phrase)
-    dictionary = collect(keys(conceptnet.embeddings[language]))
+    phrase_tokens = strip.(split(phrase))
+    embeddings = conceptnet.embeddings[language]
     # Generate positions of words that can be used for indexing (found)
     # and that can be searched (not_found)
-    found = token_search(tokens,
-                         dictionary,
+    found = token_search(phrase_tokens,
+                         embeddings,
                          sep=sep,
                          max_length=max_compound_word_length)
-    not_found = setdiff(1:length(tokens), found...)
     # Get found words
     words = Vector{String}()
     for pos in found
-        word = make_word_from_tokens(tokens, pos, sep, sep)
+        word = make_word_from_tokens(phrase_tokens, pos, sep, sep)
         push!(words, word)
     end
     # Get best matches for not found words
-    for pos in not_found
-        word = make_word_from_tokens(tokens, pos, sep, sep)
-        if search_mismatches == :no
-            # Insert not found words if exact matches are to be
-            # returned only if a matrix of width equal to the
-            # number of terms is to be returned
-            keep_size && push!(words, word)
-        elseif search_mismatches == :brute_force
-            matcher = dict_word->evaluate(distance, word, dict_word)
-            _, match_pos = findmin(map(matcher, dictionary))
-            push!(words, dictionary[match_pos])
-        else
-            @warn "The only supported approximate string matching" *
-                  " method is :brute_force. Use :no for skipping the" *
-                  " search; will not search."
-            push!(words, word)
+    words_not_found = setdiff(phrase_tokens, words)
+    if keep_size && !isempty(words_not_found)  # keep_size has precendence
+        for word in words_not_found
+            if search_mismatches == :no
+                # Insert not found words if exact matches are to be
+                # returned only if a matrix of width equal to the
+                # number of terms is to be returned
+                push!(words, word)
+            elseif search_mismatches == :brute_force
+                match_word = ""
+                distmin = Inf
+                for dict_word in keys(embeddings)
+                    dist = evaluate(distance, word, dict_word)
+                    if dist < distmin
+                        distmin = dist
+                        match_word = dict_word
+                    end
+                end
+                push!(words, match_word)
+            else
+                @warn "The only supported approximate string matching" *
+                      " method is :brute_force. Use :no for skipping the" *
+                      " search; will not search."
+                push!(words, word)
+            end
         end
     end
     # Return
@@ -62,7 +70,7 @@ function make_word_from_tokens(tokens, pos, sep, sep_end)
 end
 
 # Function that searches subphrases (continuous token combinations)
-# from a phrase in a dictionary and returns the positions of matched
+# from a phrase in a the embedded words and returns the positions of matched
 # subphrases/words
 # Example:
 #   - for a vector: String[a, simpler, world, would, be, more, complicated],
@@ -81,14 +89,14 @@ end
 #              ...
 #              more_complicated,
 #              complicated]
-function token_search(tokens, dictionary; sep::String="_", max_length::Int=3)
+function token_search(tokens, embeddings; sep::String="_", max_length::Int=3)
     found = Vector{UnitRange{Int}}()
     n = length(tokens)
     i = 1
     j = n
     while i <= n
         token = join(tokens[i:j], sep, sep)
-        if token in dictionary && j-i+1 <= max_length
+        if haskey(embeddings, token) && j-i+1 <= max_length
             push!(found, i:j)
             i = j + 1
             j = n

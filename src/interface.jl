@@ -38,9 +38,9 @@ show(io::IO, conceptnet::ConceptNetEnglish) =
 # Example: the embedding corresponding to "###_something" is returned for any search query
 #          of two words where the first word in made out out 3 letters followed by
 #          the word 'something'
-function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K}) where {K<:AbstractString, V<:AbstractVector}
-    words = keys(embeddings)
-    if keyword in words
+function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K}) where
+        {K<:AbstractString, V<:AbstractVector}
+    if haskey(embeddings, keyword)
         # The keyword exists in the dictionary
         return embeddings[keyword]
     else
@@ -73,14 +73,20 @@ end
 # Indexing
 # Generic indexing, multiple words
 # Example: julia> conceptnet[Languages.English(), ["another", "word"])
+# TODO(Make type stable!); make new get for keyword vectors
 getindex(conceptnet::ConceptNet{L,K,V}, language::L, words::S) where
-        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
-    hcat((get(conceptnet.embeddings[language],
-              word,
-              zeros(eltype(V), conceptnet.width),
-              conceptnet.fuzzy_words[language])
-          for word in words)...
-        )::Matrix{eltype(V)}
+        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} = begin
+    if !isempty(words)
+        hcat((get(conceptnet.embeddings[language],
+                  word,
+                  zeros(eltype(V), conceptnet.width),
+                  conceptnet.fuzzy_words[language])
+              for word in words)...
+            )::Matrix{eltype(V)}
+    else
+        Vector{eltype(V)}()
+    end
+end
 
 # Generic indexing, multiple words
 # Example: julia> conceptnet[:en, ["another", "word"]]
