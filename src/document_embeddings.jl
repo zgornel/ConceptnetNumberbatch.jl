@@ -14,18 +14,35 @@ end
 Retrieves the embedding matrix for a given `document`.
 """
 function embed_document(conceptnet::ConceptNet,
-                        document::S where S<:AbstractString;
+                        document::AbstractString;
                         language=Languages.English(),
                         keep_size::Bool=true,
                         max_compound_word_length::Int=1,
                         search_mismatches::Symbol=:no,
                         show_words::Bool=true,
                         distance=Levenshtein())
+    # Split document into tokens and embed
+    return embed_document(conceptnet,
+                          custom_tokenize(document),
+                          language=language,
+                          keep_size=keep_size,
+                          max_compound_word_length=max_compound_word_length,
+                          search_mismatches=search_mismatches,
+                          show_words=show_words,
+                          distance=distance)
+end
+
+function embed_document(conceptnet::ConceptNet,
+                        document_tokens::Vector{S};
+                        language=Languages.English(),
+                        keep_size::Bool=true,
+                        max_compound_word_length::Int=1,
+                        search_mismatches::Symbol=:no,
+                        show_words::Bool=true,
+                        distance=Levenshtein()) where S<:AbstractString
     # Initializations
     sep = "_"
     embeddings = conceptnet.embeddings[language]
-    # Split into tokens
-    document_tokens = custom_tokenize(document)
     # Generate positions of words that can be used for indexing (found)
     # and that can be searched (not_found)
     found = token_search(document_tokens,
