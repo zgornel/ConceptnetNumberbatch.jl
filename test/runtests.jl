@@ -109,6 +109,50 @@ end
     end
 end
 
+@testset "Document Embedding" begin
+    filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
+    conceptnet = load_embeddings(filepath, languages=[Languages.English()])
+    # Document with no matchable words
+    doc = "a aaaaa b"
+    embedded_doc = embed_document(conceptnet, doc, keep_size=false,
+                                  max_compound_word_length=1,
+                                  search_mismatches=:no,
+                                  show_words=false)
+    @test embedded_doc isa Matrix{Float64}
+    @test isempty(embedded_doc)
+    embedded_doc = embed_document(conceptnet, doc, keep_size=true,
+                                  max_compound_word_length=1,
+                                  search_mismatches=:no,
+                                  show_words=false)
+    @test embedded_doc isa Matrix{Float64}
+    @test size(embedded_doc, 2) == length(
+        ConceptnetNumberbatch.custom_tokenize(doc))
+    # Document with all words matchable
+    doc_2 = "Five words: huge adapter, xxxyyyzish, 2342 metres ."
+    embedded_doc_2 = embed_document(conceptnet, doc_2, keep_size=false,
+                                    max_compound_word_length=2,
+                                    search_mismatches=:no,
+                                    show_words=false)
+    @test embedded_doc_2 isa Matrix{Float64}
+    @test isempty(embedded_doc_2)  # no exact matches (wildcard matching not supported yet)
+    embedded_doc_2 = embed_document(conceptnet, doc_2, keep_size=true,
+                                    max_compound_word_length=2,
+                                    search_mismatches=:no,
+                                    show_words=false)
+    @test embedded_doc_2 isa Matrix{Float64}
+    @test size(embedded_doc_2, 2) == length(
+        ConceptnetNumberbatch.custom_tokenize(doc_2))
+    zero_cols = [4, 7]  # zero columns
+    for i in size(embedded_doc_2, 2)
+        embedding = embedded_doc_2[:,i]
+        if i in zero_cols
+            @test all(iszero, embedding)
+        else
+            @test any(iszero, embedding)
+        end
+    end
+end
+
 # show methods
 @testset "Show methods" begin
     buf = IOBuffer()

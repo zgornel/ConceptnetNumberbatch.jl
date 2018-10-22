@@ -8,7 +8,6 @@ ConceptNet(embeddings::Dict{K,V}, width::Int) where
         {K<:AbstractString, V<:AbstractVector} =
     ConceptNet{Languages.English(), K, V}(embeddings, width, Dict(Languages.English()=>K[]))
 
-
 # Aliases
 const ConceptNetMulti{L} = ConceptNet{L, String, Vector{Float64}}
 const ConceptNetMultiCompressed{L} = ConceptNet{L, String, Vector{Int8}}
@@ -78,6 +77,8 @@ function get(embeddings::Dict{K,V}, keywords::AbstractVector{K}, default::V, fuz
     end
     return keywords_embedded
 end
+
+
 
 # Indexing
 # Generic indexing, multiple words

@@ -1,6 +1,6 @@
 """
-Downloads embeddings given a `url` and saves them to a file
-pointed to by `localfile`.
+Download ConceptNetNumberbatch embeddings given a `url` and saves them
+to a file pointed to by `localfile`.
 """
 function download_embeddings(;url=CONCEPTNET_EN_LINK,
                              localfile=abspath("./_conceptnet_/" *
@@ -20,7 +20,7 @@ end
 
 
 """
-Function that loads the embeddings given a valid ConceptNetNumberbatch `filepath`,
+Load the embeddings given a valid ConceptNetNumberbatch `filepath`,
 lading at most `max_vocab_size` embeddings if no specific `keep_words` are
 specified, filtering on `languages`.
 """
@@ -63,8 +63,9 @@ function load_embeddings(filepath::AbstractString;
 end
 
 
-
-# Loads the ConceptNetNumberbatch from a .gz or uncompressed file
+"""
+Load the ConceptNetNumberbatch embeddings from a .gz or uncompressed file.
+"""
 function _load_gz_embeddings(filepath::S1,
                              decompressor::TranscodingStreams.Codec,
                              max_vocab_size::Union{Nothing,Int},
@@ -118,8 +119,9 @@ function _load_gz_embeddings(filepath::S1,
 end
 
 
-
-# Loads the ConceptNetNumberbatch from a HDF5 file
+"""
+Load the ConceptNetNumberbatch embeddings from a HDF5 file.
+"""
 function _load_hdf5_embeddings(filepath::S1,
                                max_vocab_size::Union{Nothing,Int},
                                keep_words::Vector{S2};
@@ -206,8 +208,9 @@ function process_language_argument(languages::Vector{L},
 end
 
 
-
-# Function that calculates how many embeddings to retreive
+"""
+Calculate how many embeddings to retreive.
+"""
 function _get_vocab_size(real_vocab_size,
                          max_vocab_size=nothing,
                          keep_words=String[])
@@ -231,8 +234,9 @@ function _get_vocab_size(real_vocab_size,
 end
 
 
-
-# Parse a line
+"""
+Parse a line of text from a ConceptNetNumberbatch delimited file.
+"""
 function _parseline(buf; word_only=false)
     bufvec = split(buf, " ")
     word = string(popfirst!(bufvec))

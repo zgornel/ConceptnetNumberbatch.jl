@@ -25,7 +25,6 @@ using CodecZlib
 using HDF5
 using Languages
 using StringDistances
-using NearestNeighbors
 
 import Base: get, getindex, size, length, show, keys, values, in
 
@@ -35,11 +34,11 @@ export CONCEPTNET_MULTI_LINK,
        ConceptNet,
        download_embeddings,
        load_embeddings,
-       phrase_embeddings
+       embed_document
 
 include("defaults.jl")
 include("interface.jl")
 include("files.jl")
-include("search.jl")
+include("document_embeddings.jl")
 
 end # module
