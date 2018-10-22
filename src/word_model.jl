@@ -1,3 +1,8 @@
+# EXPERIMENTAL, not to be used!
+# To use, uncomment the code below and add NearestNeighbors.
+
+#=
+
 # ngram NN-model for faster approximate string matching
 # So far it is not really workable, results are bad
 # An example can be found in "./scripts/test_word_model.jl"
@@ -70,3 +75,5 @@ function get_ngrams(words::Vector{S}, n::Int=2) where S<:AbstractString
     end
     return unique(ngrams)
 end
+
+=#

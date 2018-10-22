@@ -49,3 +49,6 @@ const LANGUAGES = Dict(:en=>Languages.English(),
                        # add more mappings here if needed
                        # AND supported by Languages.jl
                       )
+
+# Regular expression on which to split text into tokens
+const DEFAULT_SPLITTER = r"(,|:|\\|\/|;|\.|\[|\]|\{|\}|\"|\"|\s+)"

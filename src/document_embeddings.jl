@@ -1,32 +1,45 @@
 """
-Retrieves the embedding matrix for a given `phrase`.
+Fast tokenization function.
 """
-function phrase_embeddings(conceptnet::ConceptNet,
-                           phrase::S where S<:AbstractString;
-                           language=Languages.English(),
-                           keep_size::Bool=true,
-                           max_compound_word_length::Int=1,
-                           search_mismatches::Symbol=:no,
-                           show_words::Bool=true,
-                           distance=Levenshtein())
+function custom_tokenize(doc::AbstractString, splitter::Regex=DEFAULT_SPLITTER)
+    # First, split
+    tokens = strip.(split(doc, splitter))
+    # Filter out empty strings
+    filter!(!isempty, tokens)
+end
+
+
+
+"""
+Retrieves the embedding matrix for a given `document`.
+"""
+function embed_document(conceptnet::ConceptNet,
+                        document::S where S<:AbstractString;
+                        language=Languages.English(),
+                        keep_size::Bool=true,
+                        max_compound_word_length::Int=1,
+                        search_mismatches::Symbol=:no,
+                        show_words::Bool=true,
+                        distance=Levenshtein())
     # Initializations
     sep = "_"
-    phrase_tokens = strip.(split(phrase))
     embeddings = conceptnet.embeddings[language]
+    # Split into tokens
+    document_tokens = custom_tokenize(document)
     # Generate positions of words that can be used for indexing (found)
     # and that can be searched (not_found)
-    found = token_search(phrase_tokens,
+    found = token_search(document_tokens,
                          embeddings,
                          sep=sep,
                          max_length=max_compound_word_length)
     # Get found words
     words = Vector{String}()
     for pos in found
-        word = make_word_from_tokens(phrase_tokens, pos, sep, sep)
+        word = make_word_from_tokens(document_tokens, pos, sep, sep)
         push!(words, word)
     end
     # Get best matches for not found words
-    words_not_found = setdiff(phrase_tokens, words)
+    words_not_found = setdiff(document_tokens, words)
     if keep_size && !isempty(words_not_found)  # keep_size has precendence
         for word in words_not_found
             if search_mismatches == :no
@@ -70,7 +83,7 @@ function make_word_from_tokens(tokens, pos, sep, sep_end)
 end
 
 # Function that searches subphrases (continuous token combinations)
-# from a phrase in a the embedded words and returns the positions of matched
+# from a document in a the embedded words and returns the positions of matched
 # subphrases/words
 # Example:
 #   - for a vector: String[a, simpler, world, would, be, more, complicated],
@@ -89,6 +102,7 @@ end
 #              ...
 #              more_complicated,
 #              complicated]
+# TODO(Corneliu): Implement wildcard matching as well
 function token_search(tokens, embeddings; sep::String="_", max_length::Int=3)
     found = Vector{UnitRange{Int}}()
     n = length(tokens)
