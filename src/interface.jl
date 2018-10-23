@@ -8,7 +8,6 @@ ConceptNet(embeddings::Dict{K,V}, width::Int) where
         {K<:AbstractString, V<:AbstractVector} =
     ConceptNet{Languages.English(), K, V}(embeddings, width, Dict(Languages.English()=>K[]))
 
-
 # Aliases
 const ConceptNetMulti{L} = ConceptNet{L, String, Vector{Float64}}
 const ConceptNetMultiCompressed{L} = ConceptNet{L, String, Vector{Int8}}
@@ -38,9 +37,9 @@ show(io::IO, conceptnet::ConceptNetEnglish) =
 # Example: the embedding corresponding to "###_something" is returned for any search query
 #          of two words where the first word in made out out 3 letters followed by
 #          the word 'something'
-function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K}) where {K<:AbstractString, V<:AbstractVector}
-    words = keys(embeddings)
-    if keyword in words
+function get(embeddings::Dict{K,V}, keyword::K, default::V, fuzzy_words::Vector{K}) where
+        {K<:AbstractString, V<:AbstractVector}
+    if haskey(embeddings, keyword)
         # The keyword exists in the dictionary
         return embeddings[keyword]
     else
@@ -68,6 +67,17 @@ function get(embeddings::Dict{K,V}, keyword, default::V, fuzzy_words::Vector{K})
     end
 end
 
+function get(embeddings::Dict{K,V}, keywords::AbstractVector{K}, default::V, fuzzy_words::Vector{K};
+             n::Int=0) where
+        {K<:AbstractString, V<:AbstractVector}
+    p = length(keywords)
+    keywords_embedded = Matrix{eltype(V)}(undef, n, p)
+    for i in 1:p
+        keywords_embedded[:,i] = get(embeddings, keywords[i], default, fuzzy_words)
+    end
+    return keywords_embedded
+end
+
 
 
 # Indexing
@@ -75,12 +85,11 @@ end
 # Example: julia> conceptnet[Languages.English(), ["another", "word"])
 getindex(conceptnet::ConceptNet{L,K,V}, language::L, words::S) where
         {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
-    hcat((get(conceptnet.embeddings[language],
-              word,
-              zeros(eltype(V), conceptnet.width),
-              conceptnet.fuzzy_words[language])
-          for word in words)...
-        )::Matrix{eltype(V)}
+    get(conceptnet.embeddings[language],
+        words,
+        zeros(eltype(V), conceptnet.width),
+        conceptnet.fuzzy_words[language],
+        n=conceptnet.width)
 
 # Generic indexing, multiple words
 # Example: julia> conceptnet[:en, ["another", "word"]]
@@ -92,13 +101,16 @@ getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, words::S) where
 # Example: julia> conceptnet[Languages.English(), "word"]
 getindex(conceptnet::ConceptNet{L,K,V}, language::L, word::S) where
         {L<:Language, K, V, S<:AbstractString} =
-    conceptnet[language, [word]]
+    get(conceptnet.embeddings[language],
+        word,
+        zeros(eltype(V), conceptnet.width),
+        conceptnet.fuzzy_words[language])
 
 # Generic indexing, single word
 # Example: julia> conceptnet[:en, "word"]
 getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, word::S) where
         {L<:Language, K, V, S<:AbstractString} =
-    conceptnet[LANGUAGES[language], [word]]
+    conceptnet[LANGUAGES[language], word]
 
 # Single-language indexing: conceptnet[["another", "word"]], if language==Languages.English()
 getindex(conceptnet::ConceptNet{L,K,V}, words::S) where
@@ -108,7 +120,7 @@ getindex(conceptnet::ConceptNet{L,K,V}, words::S) where
 # Single-language indexing: conceptnet["word"], if language==Languages.English()
 getindex(conceptnet::ConceptNet{L,K,V}, word::S) where
         {L<:Languages.Language, K, V, S<:AbstractString} =
-    conceptnet[L(), [word]]
+    conceptnet[L(), word]
 
 # Index by language (returns a Dict{word=>embedding})
 getindex(conceptnet::ConceptNet, language::L) where {L<:Languages.Language} =

@@ -109,6 +109,55 @@ end
     end
 end
 
+@testset "Document Embedding" begin
+    filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
+    conceptnet = load_embeddings(filepath, languages=[Languages.English()])
+    # Document with no matchable words
+    doc = "a aaaaa b"
+    embedded_doc, missed = embed_document(conceptnet,
+                                          doc,
+                                          keep_size=false,
+                                          max_compound_word_length=1,
+                                          search_mismatches=:no)
+    @test embedded_doc isa Matrix{Float64}
+    @test isempty(embedded_doc)
+    @test length(missed) == 3
+    embedded_doc, missed = embed_document(conceptnet,
+                                          doc,
+                                          keep_size=true,
+                                          max_compound_word_length=1,
+                                          search_mismatches=:no)
+    @test embedded_doc isa Matrix{Float64}
+    @test size(embedded_doc, 2) == length(tokenize_for_conceptnet(doc))
+    @test length(missed) == 3
+    # Document with all words matchable
+    doc_2 = "Five words: huge adapter, xxyyzish, 2342 metres ."
+    embedded_doc_2, missed = embed_document(conceptnet,
+                                            doc_2,
+                                            keep_size=false,
+                                            max_compound_word_length=2,
+                                            search_mismatches=:no)
+    @test embedded_doc_2 isa Matrix{Float64}
+    @test isempty(embedded_doc_2)
+    @test length(missed) == length(tokenize_for_conceptnet(doc_2))
+    embedded_doc_2, missed = embed_document(conceptnet,
+                                            doc_2,
+                                            keep_size=true,
+                                            max_compound_word_length=2,
+                                            search_mismatches=:no)
+    @test embedded_doc_2 isa Matrix{Float64}
+    @test size(embedded_doc_2, 2) == length(tokenize_for_conceptnet(doc_2))
+    @test length(missed) == length(tokenize_for_conceptnet(doc_2))
+    embedded_doc_2, missed = embed_document(conceptnet,
+                                            doc_2,
+                                            keep_size=true,
+                                            wildcard_matching=true,
+                                            max_compound_word_length=2,
+                                            search_mismatches=:no)
+    @show missed
+    @test length(missed) == 0
+end
+
 # show methods
 @testset "Show methods" begin
     buf = IOBuffer()

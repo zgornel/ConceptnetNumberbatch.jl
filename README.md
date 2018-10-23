@@ -33,7 +33,7 @@ julia> conceptnet = load_embeddings(file_conceptnet, languages=:en)
 # ConceptNet{Languages.English} (compressed): 1 language(s), 150875 embeddings
 
 julia> conceptnet["apple"]  # Get embeddings for a single word
-# 300×1 Array{Int8,2}:
+# 300-element Array{Int8,1}:
 #   0
 #   0
 #   1
@@ -98,11 +98,27 @@ julia> # `keys` returns an iterator for all words
 # couvents
 ```
 
+Document embedding is quite straightforward:
+```julia
+julia> doc = "embed this document containing X_#-s231 which cannot be embedded"
+       edoc, idxs_missed = embed_document(conceptnet, doc, language=Languages.English(), keep_size=false)
+       missed_words = tokenize_for_conceptnet(doc)[idx_missed]
+       println("Missed word: $missed_word")
+       edoc
+# Missed word: SubString{String}["X_#-s231"]
+# 300×8 Array{Int8,2}:
+#   0   0   0   0   0   1   0   0
+#  -1  -2  -1  -1  -3  -2  -3   0
+#   1   5   0   4   6   6   6   2
+# ...
+```
+
 
 ## Remarks
 
  - fast for retrieving embeddings of exact matches
  - fast for retrieving embeddings of wildcard matches (`xyzabcish` is matched to `######ish`)
+ - fast document embedding
  - if neither exact or wildcard matches exist, retrieval can be based on string distances (slow, see `src/search.jl`)
  - for another package handling word embeddings, check out [Embeddings.jl](https://github.com/JuliaText/Embeddings.jl)
 
