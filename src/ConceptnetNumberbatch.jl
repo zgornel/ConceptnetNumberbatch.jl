@@ -34,6 +34,7 @@ export CONCEPTNET_MULTI_LINK,
        ConceptNet,
        download_embeddings,
        load_embeddings,
+       tokenize_for_conceptnet,
        embed_document
 
 include("defaults.jl")
