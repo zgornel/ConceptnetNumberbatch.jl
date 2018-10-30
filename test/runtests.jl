@@ -117,16 +117,14 @@ end
     embedded_doc, missed = embed_document(conceptnet,
                                           doc,
                                           keep_size=false,
-                                          max_compound_word_length=1,
-                                          search_mismatches=:no)
+                                          max_compound_word_length=1)
     @test embedded_doc isa Matrix{Float64}
     @test isempty(embedded_doc)
     @test length(missed) == 3
     embedded_doc, missed = embed_document(conceptnet,
                                           doc,
                                           keep_size=true,
-                                          max_compound_word_length=1,
-                                          search_mismatches=:no)
+                                          max_compound_word_length=1)
     @test embedded_doc isa Matrix{Float64}
     @test size(embedded_doc, 2) == length(tokenize_for_conceptnet(doc))
     @test length(missed) == 3
@@ -135,16 +133,14 @@ end
     embedded_doc_2, missed = embed_document(conceptnet,
                                             doc_2,
                                             keep_size=false,
-                                            max_compound_word_length=2,
-                                            search_mismatches=:no)
+                                            max_compound_word_length=2)
     @test embedded_doc_2 isa Matrix{Float64}
     @test isempty(embedded_doc_2)
     @test length(missed) == length(tokenize_for_conceptnet(doc_2))
     embedded_doc_2, missed = embed_document(conceptnet,
                                             doc_2,
                                             keep_size=true,
-                                            max_compound_word_length=2,
-                                            search_mismatches=:no)
+                                            max_compound_word_length=2)
     @test embedded_doc_2 isa Matrix{Float64}
     @test size(embedded_doc_2, 2) == length(tokenize_for_conceptnet(doc_2))
     @test length(missed) == length(tokenize_for_conceptnet(doc_2))
@@ -152,8 +148,7 @@ end
                                             doc_2,
                                             keep_size=true,
                                             wildcard_matching=true,
-                                            max_compound_word_length=2,
-                                            search_mismatches=:no)
+                                            max_compound_word_length=2)
     @show missed
     @test length(missed) == 0
 end
