@@ -116,11 +116,10 @@ julia> doc = "embed this document containing X_#-s231 which cannot be embedded"
 
 ## Remarks
 
- - fast for retrieving embeddings of exact matches
- - fast for retrieving embeddings of wildcard matches (`xyzabcish` is matched to `######ish`)
- - fast document embedding
- - if neither exact or wildcard matches exist, retrieval can be based on string distances (slow, see `src/search.jl`)
- - for another package handling word embeddings, check out [Embeddings.jl](https://github.com/JuliaText/Embeddings.jl)
+ - for the best speed, the `HDF5` version should be used
+ - the API is very fast for retrieving embeddings of single word exact matches
+ - it is also quite fast for retrieving embeddings of wildcard matches (`xyzabcish` is matched to `######ish`) and multiple word expressions of arbitrary length (provided these are embedded)
+ - the document embedding is slower (scales with document length)
 
 
 ## Installation
