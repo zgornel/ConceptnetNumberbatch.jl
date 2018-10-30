@@ -1,7 +1,11 @@
 """
 Fast tokenization function.
 """
-function tokenize_for_conceptnet(doc::AbstractString, splitter::Regex=DEFAULT_SPLITTER)
+tokenize_for_conceptnet(doc::Vector{S}, splitter::Regex=DEFAULT_SPLITTER
+                       ) where S<:AbstractString = begin doc end
+
+tokenize_for_conceptnet(doc::S, splitter::Regex=DEFAULT_SPLITTER
+                       ) where S<:AbstractString = begin
     # First, split
     tokens = strip.(split(doc, splitter))
     # Filter out empty strings
@@ -20,9 +24,7 @@ function embed_document(conceptnet::ConceptNet,
                         compound_word_separator::String="_",
                         max_compound_word_length::Int=1,
                         wildcard_matching::Bool=false,
-                        search_mismatches::Symbol=:no,
-                        print_matched_words::Bool=false,
-                        distance=Levenshtein())
+                        print_matched_words::Bool=false)
     # Split document into tokens and embed
     return embed_document(conceptnet,
                           tokenize_for_conceptnet(document),
@@ -31,9 +33,7 @@ function embed_document(conceptnet::ConceptNet,
                           compound_word_separator=compound_word_separator,
                           max_compound_word_length=max_compound_word_length,
                           wildcard_matching=wildcard_matching,
-                          search_mismatches=search_mismatches,
-                          print_matched_words=print_matched_words,
-                          distance=distance)
+                          print_matched_words=print_matched_words)
 end
 
 function embed_document(conceptnet::ConceptNet,
@@ -43,9 +43,8 @@ function embed_document(conceptnet::ConceptNet,
                         compound_word_separator::String="_",
                         max_compound_word_length::Int=1,
                         wildcard_matching::Bool=false,
-                        search_mismatches::Symbol=:no,
-                        print_matched_words::Bool=false,
-                        distance=Levenshtein()) where S<:AbstractString
+                        print_matched_words::Bool=false
+                       ) where S<:AbstractString
     # Initializations
     embeddings = conceptnet.embeddings[language]
     # Get positions of words that can be used for indexing (found)
@@ -69,31 +68,10 @@ function embed_document(conceptnet::ConceptNet,
     not_found_positions = setdiff(1:length(document_tokens),
                                   collect.(found_positions)...)
     words_not_found = document_tokens[not_found_positions]
-    if keep_size && !isempty(words_not_found)  # keep_size has precendence
+    if keep_size
         for word in words_not_found
-            if search_mismatches == :no
-                # Insert not found words if exact matches are to be
-                # returned only if a matrix of width equal to the
-                # number of terms is to be returned
-                push!(found_words, word)
-            elseif search_mismatches == :brute_force
-                match_word = ""
-                distmin = Inf
-                for dict_word in keys(embeddings)
-                    dist = evaluate(distance, word, dict_word)
-                    if dist < distmin
-                        distmin = dist
-                        match_word = dict_word
-                    end
-                end
-                push!(found_words, match_word)
-            else
-                @warn "The only supported approximate string matching" *
-                      " method is :brute_force. Use :no for skipping the" *
-                      " search; will not search."
-                push!(found_words, word)
-            end
-        end
+            push!(found_words, word)  # the zero-vectors will be the
+        end                           # last columns of the document matrix
     end
     # Return
     if print_matched_words
@@ -139,12 +117,12 @@ end
 #              more_complicated,
 #              complicated]
 function token_search(conceptnet::ConceptNet{L,K,V},
-                      tokens::S;
+                      tokens::Vector{S};
                       language::L=Languages.English(),
                       separator::String="_",
                       max_length::Int=3,
                       wildcard_matching::Bool=false) where
-        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}}
+        {L<:Language, K, V, S<:AbstractString}
     # Initializations
     if wildcard_matching
         # Build function that checks whether a token is found in conceptnet
@@ -163,20 +141,21 @@ function token_search(conceptnet::ConceptNet{L,K,V},
     i = 1
     j = n
     while i <= n
-        token = join(tokens[i:j], separator, separator)
-        is_match = check_function(conceptnet, language, token, V())
-        if is_match && j-i+1 <= max_length
-            push!(found, i:j)
-            i = j + 1
-            j = n
-            continue
-        else
-            if i == j
+        if j-i+1 <= max_length
+            token = join(tokens[i:j], separator, separator)
+            is_match = check_function(conceptnet, language, token, V())
+            if is_match
+                push!(found, i:j)
+                i = j + 1
                 j = n
-                i+= 1
-            else
-                j-= 1
+                continue
             end
+        end
+        if i == j
+            j = n
+            i+= 1
+        else
+            j-= 1
         end
     end
     return found

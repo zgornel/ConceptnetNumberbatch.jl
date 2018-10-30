@@ -51,4 +51,4 @@ const LANGUAGES = Dict(:en=>Languages.English(),
                       )
 
 # Regular expression on which to split text into tokens
-const DEFAULT_SPLITTER = r"(,|:|\\|\/|;|\.|\[|\]|\{|\}|\"|\"|\s+)"
+const DEFAULT_SPLITTER = r"(,|\n|\r|\:|\\|\/|;|\.|\[|\]|\{|\}|\'|\`|\"|\"|\?|\!|\=|\~|\&|\s+)"
