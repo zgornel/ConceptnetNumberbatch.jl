@@ -17,14 +17,15 @@ end
 """
 Retrieves the embedding matrix for a given `document`.
 """
-function embed_document(conceptnet::ConceptNet,
+function embed_document(conceptnet::ConceptNet{L,K,V},
                         document::AbstractString;
                         language=Languages.English(),
                         keep_size::Bool=true,
                         compound_word_separator::String="_",
                         max_compound_word_length::Int=1,
                         wildcard_matching::Bool=false,
-                        print_matched_words::Bool=false)
+                        print_matched_words::Bool=false
+                       ) where {L<:Language, K, V}
     # Split document into tokens and embed
     return embed_document(conceptnet,
                           tokenize_for_conceptnet(document),
@@ -36,7 +37,7 @@ function embed_document(conceptnet::ConceptNet,
                           print_matched_words=print_matched_words)
 end
 
-function embed_document(conceptnet::ConceptNet,
+function embed_document(conceptnet::ConceptNet{L,K,V},
                         document_tokens::Vector{S};
                         language=Languages.English(),
                         keep_size::Bool=true,
@@ -44,7 +45,7 @@ function embed_document(conceptnet::ConceptNet,
                         max_compound_word_length::Int=1,
                         wildcard_matching::Bool=false,
                         print_matched_words::Bool=false
-                       ) where S<:AbstractString
+                       ) where {L<:Language, K, V, S<:AbstractString}
     # Initializations
     embeddings = conceptnet.embeddings[language]
     # Get positions of words that can be used for indexing (found)
@@ -67,18 +68,26 @@ function embed_document(conceptnet::ConceptNet,
     # Get best matches for not found words
     not_found_positions = setdiff(1:length(document_tokens),
                                   collect.(found_positions)...)
-    words_not_found = document_tokens[not_found_positions]
-    if keep_size
-        for word in words_not_found
-            push!(found_words, word)  # the zero-vectors will be the
-        end                           # last columns of the document matrix
-    end
     # Return
     if print_matched_words
+        words_not_found = document_tokens[not_found_positions]
         println("Embedded words: $found_words")
         println("Mismatched words: $words_not_found")
     end
-    return conceptnet[language, found_words], not_found_positions
+    default = zeros(eltype(V), conceptnet.width)
+    _embdoc = get(conceptnet.embeddings[language],
+                  found_words,
+                  default,
+                  conceptnet.fuzzy_words[language],
+                  n=conceptnet.width,
+                  wildcard_matching=wildcard_matching)
+    if keep_size
+        embedded_document = hcat(_embdoc, zeros(eltype(V), conceptnet.width,
+                                                length(not_found_positions)))
+    else
+        embedded_document = _embdoc
+    end
+    return embedded_document, not_found_positions
 end
 
 
@@ -95,6 +104,8 @@ function make_word_from_tokens(tokens::Vector{S},
         return join(tokens[pos], separator, separator_last)
     end
 end
+
+
 
 # Function that searches subphrases (continuous token combinations)
 # from a document in a the embedded words and returns the positions of matched
@@ -124,18 +135,6 @@ function token_search(conceptnet::ConceptNet{L,K,V},
                       wildcard_matching::Bool=false) where
         {L<:Language, K, V, S<:AbstractString}
     # Initializations
-    if wildcard_matching
-        # Build function that checks whether a token is found in conceptnet
-        # using/or not wildcard matching
-        check_function = (conceptnet, language, token, default)->
-                            !isempty(get(conceptnet[language],  # get from interface.jl
-                                         token,
-                                         default,
-                                         conceptnet.fuzzy_words[language]))
-    else
-        check_function = (conceptnet, language, token, default)->
-                            haskey(conceptnet[language], token)
-    end
     found = Vector{UnitRange{Int}}()
     n = length(tokens)
     i = 1
@@ -143,7 +142,9 @@ function token_search(conceptnet::ConceptNet{L,K,V},
     while i <= n
         if j-i+1 <= max_length
             token = join(tokens[i:j], separator, separator)
-            is_match = check_function(conceptnet, language, token, V())
+            is_match = !isempty(get(conceptnet[language], token, V(),
+                                    conceptnet.fuzzy_words[language],
+                                    wildcard_matching=wildcard_matching))
             if is_match
                 push!(found, i:j)
                 i = j + 1
