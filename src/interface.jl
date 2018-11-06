@@ -37,43 +37,60 @@ show(io::IO, conceptnet::ConceptNetEnglish) =
 # Example: the embedding corresponding to "###_something" is returned for any search query
 #          of two words where the first word in made out out 3 letters followed by
 #          the word 'something'
-function get(embeddings::Dict{K,V}, keyword::K, default::V, fuzzy_words::Vector{K}) where
+function get(embeddings::Dict{K,V},
+             keyword::K,
+             default::V,
+             fuzzy_words::Vector{K};
+             wildcard_matching::Bool=true) where
         {K<:AbstractString, V<:AbstractVector}
     if haskey(embeddings, keyword)
         # The keyword exists in the dictionary
         return embeddings[keyword]
     else
-        # The keyword is not found; try fuzzy matching
-        ω = 0.4 # weight assinged to matching a #, 1-w weight assigned to a matching letter
-        L = length(keyword)
-        matches = (word for word in fuzzy_words
-                   if length(word) == L &&
-                      occursin(Regex(replace(word,"#"=>".")), keyword))
-        if isempty(matches)
-            return default
-        else
-            best_match = ""
-            max_score = 0
-            for match in matches
-                l = length(replace(match,"#"=>"")) # number of letters matched
-                score = ω*(L-l)/L + (1-ω)*l/L
-                if score > max_score
-                    best_match = match
-                    max_score = score
+        if wildcard_matching
+            # The keyword is not found; try fuzzy matching
+            ω = 0.4 # weight assinged to matching a #, 1-w weight assigned to a matching letter
+            L = length(keyword)
+            matches = (word for word in fuzzy_words
+                       if length(word) == L &&
+                          occursin(Regex(replace(word,"#"=>".")), keyword))
+            if isempty(matches)
+                return default
+            else
+                best_match = ""
+                max_score = 0
+                for match in matches
+                    l = length(replace(match,"#"=>"")) # number of letters matched
+                    score = ω*(L-l)/L + (1-ω)*l/L
+                    if score > max_score
+                        best_match = match
+                        max_score = score
+                    end
                 end
+                return embeddings[best_match]
             end
-            return embeddings[best_match]
+        else
+            # The keyword is not found; no fuzzy matching
+            return default
         end
     end
 end
 
-function get(embeddings::Dict{K,V}, keywords::AbstractVector{K}, default::V, fuzzy_words::Vector{K};
+function get(embeddings::Dict{K,V},
+             keywords::AbstractVector{K},
+             default::V,
+             fuzzy_words::Vector{K};
+             wildcard_matching::Bool=true,
              n::Int=0) where
         {K<:AbstractString, V<:AbstractVector}
     p = length(keywords)
     keywords_embedded = Matrix{eltype(V)}(undef, n, p)
     for i in 1:p
-        keywords_embedded[:,i] = get(embeddings, keywords[i], default, fuzzy_words)
+        keywords_embedded[:,i] = get(embeddings,
+                                     keywords[i],
+                                     default,
+                                     fuzzy_words,
+                                     wildcard_matching=wildcard_matching)
     end
     return keywords_embedded
 end
@@ -89,6 +106,7 @@ getindex(conceptnet::ConceptNet{L,K,V}, language::L, words::S) where
         words,
         zeros(eltype(V), conceptnet.width),
         conceptnet.fuzzy_words[language],
+        wildcard_matching=true,
         n=conceptnet.width)
 
 # Generic indexing, multiple words
@@ -104,7 +122,8 @@ getindex(conceptnet::ConceptNet{L,K,V}, language::L, word::S) where
     get(conceptnet.embeddings[language],
         word,
         zeros(eltype(V), conceptnet.width),
-        conceptnet.fuzzy_words[language])
+        conceptnet.fuzzy_words[language],
+        wildcard_matching=true)
 
 # Generic indexing, single word
 # Example: julia> conceptnet[:en, "word"]
