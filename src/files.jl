@@ -27,12 +27,10 @@ specified, filtering on `languages`.
 function load_embeddings(filepath::AbstractString;
                          max_vocab_size::Union{Nothing,Int}=nothing,
                          keep_words=String[],
-                         languages::Union{Nothing,
-                                          Languages.Language,
+                         languages::Union{Nothing, Languages.Language,
                                           Vector{<:Languages.Language},
-                                          Symbol,
-                                          Vector{Symbol}
-                                         }=nothing)
+                                          Symbol, Vector{Symbol}}=nothing,
+                         data_type::Type{E}=Float64) where E<:Real
     if languages isa Nothing
         languages = unique(collect(values(LANGUAGES)))
     elseif languages isa Symbol
@@ -46,7 +44,8 @@ function load_embeddings(filepath::AbstractString;
                                          GzipDecompressor(),
                                          max_vocab_size,
                                          keep_words,
-                                         languages=languages)
+                                         languages=languages,
+                                         data_type=data_type)
     elseif any(endswith.(filepath, [".h5", ".hdf5"]))
         conceptnet = _load_hdf5_embeddings(filepath,
                                            max_vocab_size,
@@ -57,7 +56,8 @@ function load_embeddings(filepath::AbstractString;
                                          Noop(),
                                          max_vocab_size,
                                          keep_words,
-                                         languages=languages)
+                                         languages=languages,
+                                         data_type=data_type)
     end
     return conceptnet
 end
@@ -70,14 +70,14 @@ function _load_gz_embeddings(filepath::S1,
                              decompressor::TranscodingStreams.Codec,
                              max_vocab_size::Union{Nothing,Int},
                              keep_words::Vector{S2};
-                             languages::Union{Nothing,
-                                              Languages.Language,
+                             languages::Union{Nothing, Languages.Language,
                                               Vector{<:Languages.Language}
-                                             }=nothing) where
-        {S1<:AbstractString, S2<:AbstractString}
+                                             }=nothing,
+                         data_type::Type{E}=Float64) where
+        {E<:Real, S1<:AbstractString, S2<:AbstractString}
     local lang_embs, _length::Int, _width::Int, type_lang, fuzzy_words
     type_word = String
-    type_vector = Vector{Float64}
+    type_vector = Vector{E}
     open(filepath, "r") do fid
         cfid = TranscodingStream(decompressor, fid)
         _length, _width = parse.(Int64, split(readline(cfid)))
@@ -91,7 +91,7 @@ function _load_gz_embeddings(filepath::S1,
         lang = :en
         cnt = 0
         for (idx, line) in enumerate(eachline(cfid))
-            word, _ = _parseline(line, word_only=true)
+            word, _ = _parseline(line, data_type, word_only=true)
             if !english_only
                 _, _, _lang, word = split(word,"/")
                 lang = Symbol(_lang)
@@ -103,7 +103,7 @@ function _load_gz_embeddings(filepath::S1,
                         push!(lang_embs, _llang=>Dict{type_word, type_vector}())
                         push!(fuzzy_words, _llang=>type_word[])
                     end
-                    _, embedding = _parseline(line, word_only=false)
+                    _, embedding = _parseline(line, data_type, word_only=false)
                     occursin("#", word) && push!(fuzzy_words[_llang], word)
                     push!(lang_embs[_llang], word=>embedding)
                     cnt+=1
@@ -115,7 +115,7 @@ function _load_gz_embeddings(filepath::S1,
         end
         close(cfid)
     end
-    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, _width, fuzzy_words)
+    return ConceptNet{type_lang, type_word, E}(lang_embs, _width, fuzzy_words)
 end
 
 
@@ -164,7 +164,7 @@ function _load_hdf5_embeddings(filepath::S1,
             end
         end
     end
-    return ConceptNet{type_lang, type_word, type_vector}(lang_embs, size(embeddings,1), fuzzy_words)
+    return ConceptNet{type_lang, type_word, Int8}(lang_embs, size(embeddings,1), fuzzy_words)
 end
 
 
@@ -237,13 +237,13 @@ end
 """
 Parse a line of text from a ConceptNetNumberbatch delimited file.
 """
-function _parseline(buf; word_only=false)
+function _parseline(buf, data_type::Type{E}; word_only=false) where E<:Real
     bufvec = split(buf, " ")
     word = string(popfirst!(bufvec))
     if word_only
-        return word, Float64[]
+        return word, E[]
     else
-        embedding = parse.(Float64, bufvec)
+        embedding = parse.(E, bufvec)
         return word, embedding
     end
 end

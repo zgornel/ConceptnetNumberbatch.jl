@@ -17,7 +17,7 @@ end
 """
 Retrieves the embedding matrix for a given `document`.
 """
-function embed_document(conceptnet::ConceptNet{L,K,V},
+function embed_document(conceptnet::ConceptNet{L,K,E},
                         document::AbstractString;
                         language=Languages.English(),
                         keep_size::Bool=true,
@@ -25,7 +25,7 @@ function embed_document(conceptnet::ConceptNet{L,K,V},
                         max_compound_word_length::Int=1,
                         wildcard_matching::Bool=false,
                         print_matched_words::Bool=false
-                       ) where {L<:Language, K, V}
+                       ) where {L<:Language, K, E<:Real}
     # Split document into tokens and embed
     return embed_document(conceptnet,
                           tokenize_for_conceptnet(document),
@@ -37,7 +37,7 @@ function embed_document(conceptnet::ConceptNet{L,K,V},
                           print_matched_words=print_matched_words)
 end
 
-function embed_document(conceptnet::ConceptNet{L,K,V},
+function embed_document(conceptnet::ConceptNet{L,K,E},
                         document_tokens::Vector{S};
                         language=Languages.English(),
                         keep_size::Bool=true,
@@ -45,7 +45,7 @@ function embed_document(conceptnet::ConceptNet{L,K,V},
                         max_compound_word_length::Int=1,
                         wildcard_matching::Bool=false,
                         print_matched_words::Bool=false
-                       ) where {L<:Language, K, V, S<:AbstractString}
+                       ) where {L<:Language, K, E<:Real, S<:AbstractString}
     # Initializations
     embeddings = conceptnet.embeddings[language]
     # Get positions of words that can be used for indexing (found)
@@ -74,7 +74,7 @@ function embed_document(conceptnet::ConceptNet{L,K,V},
         println("Embedded words: $found_words")
         println("Mismatched words: $words_not_found")
     end
-    default = zeros(eltype(V), conceptnet.width)
+    default = zeros(E, conceptnet.width)
     _embdoc = get(conceptnet.embeddings[language],
                   found_words,
                   default,
@@ -82,7 +82,7 @@ function embed_document(conceptnet::ConceptNet{L,K,V},
                   n=conceptnet.width,
                   wildcard_matching=wildcard_matching)
     if keep_size
-        embedded_document = hcat(_embdoc, zeros(eltype(V), conceptnet.width,
+        embedded_document = hcat(_embdoc, zeros(E, conceptnet.width,
                                                 length(not_found_positions)))
     else
         embedded_document = _embdoc
@@ -127,13 +127,13 @@ end
 #              ...
 #              more_complicated,
 #              complicated]
-function token_search(conceptnet::ConceptNet{L,K,V},
+function token_search(conceptnet::ConceptNet{L,K,E},
                       tokens::Vector{S};
                       language::L=Languages.English(),
                       separator::String="_",
                       max_length::Int=3,
                       wildcard_matching::Bool=false) where
-        {L<:Language, K, V, S<:AbstractString}
+        {L<:Language, K, E<:Real, S<:AbstractString}
     # Initializations
     found = Vector{UnitRange{Int}}()
     n = length(tokens)
@@ -142,7 +142,8 @@ function token_search(conceptnet::ConceptNet{L,K,V},
     while i <= n
         if j-i+1 <= max_length
             token = join(tokens[i:j], separator, separator)
-            is_match = !isempty(get(conceptnet[language], token, V(),
+            is_match = !isempty(get(conceptnet[language], token,
+                                    Vector{E}(),
                                     conceptnet.fuzzy_words[language],
                                     wildcard_matching=wildcard_matching))
             if is_match
