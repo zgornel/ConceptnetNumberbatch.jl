@@ -77,7 +77,6 @@ function _load_gz_embeddings(filepath::S1,
         {E<:Real, S1<:AbstractString, S2<:AbstractString}
     local lang_embs, _length::Int, _width::Int, type_lang, fuzzy_words
     type_word = String
-    type_vector = Vector{E}
     open(filepath, "r") do fid
         cfid = TranscodingStream(decompressor, fid)
         _length, _width = parse.(Int64, split(readline(cfid)))
@@ -85,7 +84,7 @@ function _load_gz_embeddings(filepath::S1,
                                      max_vocab_size,
                                      keep_words)
         lang_embs, languages, type_lang, english_only =
-            process_language_argument(languages, type_word, type_vector)
+            process_language_argument(languages, type_word, data_type)
 		fuzzy_words = Dict{type_lang, Vector{type_word}}()
         no_custom_words = length(keep_words)==0
         lang = :en
@@ -100,7 +99,8 @@ function _load_gz_embeddings(filepath::S1,
                 if lang in keys(LANGUAGES) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
                     _llang = LANGUAGES[lang]
                     if !haskey(lang_embs, _llang)
-                        push!(lang_embs, _llang=>Dict{type_word, type_vector}())
+                        push!(lang_embs, _llang=>Dict{type_word,
+                                                      Vector{data_type}}())
                         push!(fuzzy_words, _llang=>type_word[])
                     end
                     _, embedding = _parseline(line, data_type, word_only=false)
@@ -115,7 +115,7 @@ function _load_gz_embeddings(filepath::S1,
         end
         close(cfid)
     end
-    return ConceptNet{type_lang, type_word, E}(lang_embs, _width, fuzzy_words)
+    return ConceptNet{type_lang, type_word, data_type}(lang_embs, _width, fuzzy_words)
 end
 
 
@@ -132,7 +132,6 @@ function _load_hdf5_embeddings(filepath::S1,
         {S1<:AbstractString, S2<:AbstractString}
     local fuzzy_words
     type_word = String
-    type_vector = Vector{Int8}
     payload = h5open(read, filepath)["mat"]
     words = map(payload["axis1"]) do val
         _, _, lang, word = split(val, "/")
@@ -143,7 +142,7 @@ function _load_hdf5_embeddings(filepath::S1,
                                  max_vocab_size,
                                  keep_words)
     lang_embs, languages, type_lang, _ =
-        process_language_argument(languages, type_word, type_vector)
+        process_language_argument(languages, type_word, Int8)
 	fuzzy_words = Dict{type_lang, Vector{type_word}}()
     no_custom_words = length(keep_words)==0
     cnt = 0
@@ -152,7 +151,7 @@ function _load_hdf5_embeddings(filepath::S1,
             if haskey(LANGUAGES, lang) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
                 _llang = LANGUAGES[lang]
                 if !haskey(lang_embs, _llang)
-                    push!(lang_embs, _llang=>Dict{type_word, type_vector}())
+                    push!(lang_embs, _llang=>Dict{type_word, Vector{Int8}}())
                     push!(fuzzy_words, _llang=>type_word[])
                 end
                 occursin("#", word) && push!(fuzzy_words[_llang], word)
@@ -178,32 +177,32 @@ end
 #   - a flag specifying whether only English is used or not
 function process_language_argument(languages::Nothing,
                                    type_word::T1,
-                                   type_vector::T2) where {T1, T2}
-    return Dict{Languages.Language, Dict{type_word, type_vector}}(),
+                                   type_data::T2) where {T1, T2}
+    return Dict{Languages.Language, Dict{type_word, Vector{type_data}}}(),
            collect(language for language in LANGUAGES),
            Languages.Language, false
 end
 
 function process_language_argument(languages::Languages.English,
                                    type_word::T1,
-                                   type_vector::T2) where {T1, T2}
-    return Dict{Languages.English, Dict{type_word, type_vector}}(), [languages],
+                                   type_data::T2) where {T1, T2}
+    return Dict{Languages.English, Dict{type_word, Vector{type_data}}}(), [languages],
            Languages.English, true
 end
 
 function process_language_argument(languages::L,
                                    type_word::T1,
-                                   type_vector::T2) where {L<:Languages.Language, T1, T2}
-    return Dict{L, Dict{type_word, type_vector}}(), [languages], L, false
+                                   type_data::T2) where {L<:Languages.Language, T1, T2}
+    return Dict{L, Dict{type_word, Vector{type_data}}}(), [languages], L, false
 end
 
 function process_language_argument(languages::Vector{L},
                                    type_word::T1,
-                                   type_vector::T2) where {L<:Languages.Language, T1, T2}
+                                   type_data::T2) where {L<:Languages.Language, T1, T2}
     if length(languages) == 1
-        return process_language_argument(languages[1], type_word, type_vector)
+        return process_language_argument(languages[1], type_word, type_data)
     else
-        return Dict{L, Dict{type_word, type_vector}}(), languages, L, false
+        return Dict{L, Dict{type_word, Vector{type_data}}}(), languages, L, false
     end
 end
 
