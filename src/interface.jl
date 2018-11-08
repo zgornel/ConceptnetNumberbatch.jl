@@ -1,35 +1,35 @@
-struct ConceptNet{L<:Language, K<:AbstractString, V<:AbstractVector}
-    embeddings::Dict{L, Dict{K,V}}
+struct ConceptNet{L<:Language, K<:AbstractString, E<:Real}
+    embeddings::Dict{L, Dict{K,Vector{E}}}
     width::Int
     fuzzy_words::Dict{L, Vector{K}}
 end
 
-ConceptNet(embeddings::Dict{K,V}, width::Int) where
-        {K<:AbstractString, V<:AbstractVector} =
-    ConceptNet{Languages.English(), K, V}(embeddings, width, Dict(Languages.English()=>K[]))
+ConceptNet(embeddings::Dict{K,Vector{E}}, width::Int) where
+        {K<:AbstractString, E<:Real} =
+    ConceptNet{Languages.English(), K, E}(embeddings, width, Dict(Languages.English()=>K[]))
 
 # Aliases
-const ConceptNetMulti{L} = ConceptNet{L, String, Vector{Float64}}
-const ConceptNetMultiCompressed{L} = ConceptNet{L, String, Vector{Int8}}
-const ConceptNetEnglish = ConceptNet{Languages.English, String, Vector{Float64}}
+const ConceptNetMulti{L,E<:Real} = ConceptNet{L, String, E}
+const ConceptNetMultiCompressed{L} = ConceptNet{L, String, Int8}
+const ConceptNetEnglish{E} = ConceptNet{Languages.English, String, E}
 
 
 
 # Show methods
-show(io::IO, conceptnet::ConceptNetMultiCompressed{L}) where {L} = begin
+show(io::IO, conceptnet::ConceptNetMultiCompressed{L}) where L = begin
     nlanguages = length(conceptnet.embeddings)
     print(io, "ConceptNet{$L} (compressed): $nlanguages language(s)",
           ", $(length(conceptnet)) embeddings")
 end
 
-show(io::IO, conceptnet::ConceptNetMulti{L}) where {L} = begin
+show(io::IO, conceptnet::ConceptNetMulti{L,E}) where {L,E} = begin
     nlanguages = length(conceptnet.embeddings)
-    print(io, "ConceptNet{$L}: $nlanguages language(s)",
+    print(io, "ConceptNet{$L,$E}: $nlanguages language(s)",
           ", $(length(conceptnet)) embeddings")
 end
 
-show(io::IO, conceptnet::ConceptNetEnglish) =
-    print(io, "ConceptNet{English}: $(length(conceptnet)) embeddings")
+show(io::IO, conceptnet::ConceptNetEnglish{E}) where E =
+    print(io, "ConceptNet{English,$E}: $(length(conceptnet)) embeddings")
 
 
 
@@ -37,12 +37,12 @@ show(io::IO, conceptnet::ConceptNetEnglish) =
 # Example: the embedding corresponding to "###_something" is returned for any search query
 #          of two words where the first word in made out out 3 letters followed by
 #          the word 'something'
-function get(embeddings::Dict{K,V},
+function get(embeddings::Dict{K,Vector{E}},
              keyword::K,
-             default::V,
+             default::Vector{E},
              fuzzy_words::Vector{K};
              wildcard_matching::Bool=true) where
-        {K<:AbstractString, V<:AbstractVector}
+        {K<:AbstractString, E<:Real}
     if haskey(embeddings, keyword)
         # The keyword exists in the dictionary
         return embeddings[keyword]
@@ -76,15 +76,15 @@ function get(embeddings::Dict{K,V},
     end
 end
 
-function get(embeddings::Dict{K,V},
+function get(embeddings::Dict{K,Vector{E}},
              keywords::AbstractVector{K},
-             default::V,
+             default::Vector{E},
              fuzzy_words::Vector{K};
              wildcard_matching::Bool=true,
              n::Int=0) where
-        {K<:AbstractString, V<:AbstractVector}
+        {K<:AbstractString, E<:Real}
     p = length(keywords)
-    keywords_embedded = Matrix{eltype(V)}(undef, n, p)
+    keywords_embedded = Matrix{E}(undef, n, p)
     for i in 1:p
         keywords_embedded[:,i] = get(embeddings,
                                      keywords[i],
@@ -100,45 +100,45 @@ end
 # Indexing
 # Generic indexing, multiple words
 # Example: julia> conceptnet[Languages.English(), ["another", "word"])
-getindex(conceptnet::ConceptNet{L,K,V}, language::L, words::S) where
-        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
+getindex(conceptnet::ConceptNet{L,K,E}, language::L, words::S) where
+        {L<:Language, K, E<:Real, S<:AbstractVector{<:AbstractString}} =
     get(conceptnet.embeddings[language],
         words,
-        zeros(eltype(V), conceptnet.width),
+        zeros(E, conceptnet.width),
         conceptnet.fuzzy_words[language],
         wildcard_matching=true,
         n=conceptnet.width)
 
 # Generic indexing, multiple words
 # Example: julia> conceptnet[:en, ["another", "word"]]
-getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, words::S) where
-        {L<:Language, K, V, S<:AbstractVector{<:AbstractString}} =
+getindex(conceptnet::ConceptNet{L,K,E}, language::Symbol, words::S) where
+        {L<:Language, K, E<:Real, S<:AbstractVector{<:AbstractString}} =
     conceptnet[LANGUAGES[language], words]
 
 # Generic indexing, single word
 # Example: julia> conceptnet[Languages.English(), "word"]
-getindex(conceptnet::ConceptNet{L,K,V}, language::L, word::S) where
-        {L<:Language, K, V, S<:AbstractString} =
+getindex(conceptnet::ConceptNet{L,K,E}, language::L, word::S) where
+        {L<:Language, K, E<:Real, S<:AbstractString} =
     get(conceptnet.embeddings[language],
         word,
-        zeros(eltype(V), conceptnet.width),
+        zeros(E, conceptnet.width),
         conceptnet.fuzzy_words[language],
         wildcard_matching=true)
 
 # Generic indexing, single word
 # Example: julia> conceptnet[:en, "word"]
-getindex(conceptnet::ConceptNet{L,K,V}, language::Symbol, word::S) where
-        {L<:Language, K, V, S<:AbstractString} =
+getindex(conceptnet::ConceptNet{L,K,E}, language::Symbol, word::S) where
+        {L<:Language, K, E<:Real, S<:AbstractString} =
     conceptnet[LANGUAGES[language], word]
 
 # Single-language indexing: conceptnet[["another", "word"]], if language==Languages.English()
-getindex(conceptnet::ConceptNet{L,K,V}, words::S) where
-        {L<:Languages.Language, K, V, S<:AbstractVector{<:AbstractString}} =
+getindex(conceptnet::ConceptNet{L,K,E}, words::S) where
+        {L<:Languages.Language, K, E<:Real, S<:AbstractVector{<:AbstractString}} =
     conceptnet[L(), words]
 
 # Single-language indexing: conceptnet["word"], if language==Languages.English()
-getindex(conceptnet::ConceptNet{L,K,V}, word::S) where
-        {L<:Languages.Language, K, V, S<:AbstractString} =
+getindex(conceptnet::ConceptNet{L,K,E}, word::S) where
+        {L<:Languages.Language, K, E<:Real, S<:AbstractString} =
     conceptnet[L(), word]
 
 # Index by language (returns a Dict{word=>embedding})
