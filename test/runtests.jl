@@ -3,8 +3,9 @@ using Languages
 using ConceptnetNumberbatch
 
 # Test file with just 2 entriesa (test purposes only)
-const DATA_TYPE = Float64
-const CONCEPTNET_TEST_DATA = Dict(  # filename => output type
+const DATA_TYPE = Float32
+const CONCEPTNET_TEST_DATA = Dict(
+    # filename => output type
     (joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz") =>
      ([Languages.English()],
       ["####_ish", "####_form", "####_metres"],
@@ -17,18 +18,20 @@ const CONCEPTNET_TEST_DATA = Dict(  # filename => output type
 
     (joinpath(string(@__DIR__), "data", "_test_file.txt") =>
      (nothing,
-     ["1_konings", "aaklig", "aak"],
+      ["1_konings", "aaklig", "aak"],
       ConceptNet{Languages.Language, String, DATA_TYPE})),
 
     (joinpath(string(@__DIR__), "data", "_test_file.h5") =>
      (nothing,
       ["1", "2", "2d"],
-      ConceptNet{Languages.Language, String, Int8}))
-   )
+      ConceptNet{Languages.Language, String, DATA_TYPE}))
+)
 
 @testset "Parser: (no arguments)" begin
     for (filename, (languages, _, resulting_type)) in CONCEPTNET_TEST_DATA
-        conceptnet = load_embeddings(filename, languages=languages);
+        conceptnet = load_embeddings(filename,
+                                     languages=languages,
+                                     data_type=DATA_TYPE);
         @test conceptnet isa resulting_type
     end
 end
@@ -36,7 +39,8 @@ end
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5" begin
     for (filename, (languages, _, _)) in CONCEPTNET_TEST_DATA
-        conceptnet = load_embeddings(filename, max_vocab_size=max_vocab_size,
+        conceptnet = load_embeddings(filename,
+                                     max_vocab_size=max_vocab_size,
                                      languages=languages);
         @test length(conceptnet) == max_vocab_size
     end
@@ -45,8 +49,10 @@ end
 max_vocab_size=5
 @testset "Parser: max_vocab_size=5, 3 keep words" begin
     for (filename, (languages, keep_words, _)) in CONCEPTNET_TEST_DATA
-        conceptnet = load_embeddings(filename, max_vocab_size=max_vocab_size,
-                                     keep_words=keep_words, languages=languages)
+        conceptnet = load_embeddings(filename,
+                                     max_vocab_size=max_vocab_size,
+                                     keep_words=keep_words,
+                                     languages=languages)
         @test length(conceptnet) == length(keep_words)
         for word in keep_words
             @test word in conceptnet
@@ -63,7 +69,7 @@ end
     # Test indexing
     idx = 1
     @test conceptnet[words[idx]] == conceptnet[:en, words[idx]] ==
-        conceptnet[Languages.English(), words[idx]]
+    conceptnet[Languages.English(), words[idx]]
 
     # Test values
     embeddings = conceptnet[words]
@@ -84,14 +90,14 @@ end
     @test_throws MethodError conceptnet[words]  # type of language is Language, cannot directly search
     @test_throws KeyError conceptnet[:en, "word"]  # English language not present
     @test conceptnet[:nl, words[idx]] ==
-        conceptnet[Languages.Dutch(), words[idx]]
+    conceptnet[Languages.Dutch(), words[idx]]
 
     # Test values
     for (idx, word) in enumerate(words)
         @test_throws KeyError conceptnet[Languages.English(), word]
         if word in conceptnet
             @test vec(conceptnet[Languages.Dutch(), word]) ==
-                conceptnet.embeddings[Languages.Dutch()][word]
+            conceptnet.embeddings[Languages.Dutch()][word]
         else
             @test iszero(conceptnet[Languages.Dutch(),word])
         end
@@ -112,7 +118,9 @@ end
 
 @testset "Document Embedding" begin
     filepath = joinpath(string(@__DIR__), "data", "_test_file_en.txt.gz")
-    conceptnet = load_embeddings(filepath, languages=[Languages.English()])
+    conceptnet = load_embeddings(filepath,
+                                 languages=[Languages.English()],
+                                 data_type=DATA_TYPE)
     # Document with no matchable words
     doc = "a aaaaa b"
     embedded_doc, missed = embed_document(conceptnet,

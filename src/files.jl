@@ -50,7 +50,8 @@ function load_embeddings(filepath::AbstractString;
         conceptnet = _load_hdf5_embeddings(filepath,
                                            max_vocab_size,
                                            keep_words,
-                                           languages=languages)
+                                           languages=languages,
+                                           data_type=data_type)
     else
         conceptnet = _load_gz_embeddings(filepath,
                                          Noop(),
@@ -125,11 +126,10 @@ Load the ConceptNetNumberbatch embeddings from a HDF5 file.
 function _load_hdf5_embeddings(filepath::S1,
                                max_vocab_size::Union{Nothing,Int},
                                keep_words::Vector{S2};
-                               languages::Union{Nothing,
-                                                Languages.Language,
-                                                Vector{<:Languages.Language}
-                                               }=nothing) where
-        {S1<:AbstractString, S2<:AbstractString}
+                               languages::Union{Nothing, Languages.Language,
+                                    Vector{<:Languages.Language}}=nothing,
+                               data_type::Type{E}=Int8) where
+        {S1<:AbstractString, S2<:AbstractString, E<:Real}
     local fuzzy_words
     type_word = String
     payload = h5open(read, filepath)["mat"]
@@ -142,7 +142,7 @@ function _load_hdf5_embeddings(filepath::S1,
                                  max_vocab_size,
                                  keep_words)
     lang_embs, languages, type_lang, _ =
-        process_language_argument(languages, type_word, Int8)
+        process_language_argument(languages, type_word, E)
 	fuzzy_words = Dict{type_lang, Vector{type_word}}()
     no_custom_words = length(keep_words)==0
     cnt = 0
@@ -151,7 +151,7 @@ function _load_hdf5_embeddings(filepath::S1,
             if haskey(LANGUAGES, lang) && LANGUAGES[lang] in languages  # use only languages mapped in LANGUAGES
                 _llang = LANGUAGES[lang]
                 if !haskey(lang_embs, _llang)
-                    push!(lang_embs, _llang=>Dict{type_word, Vector{Int8}}())
+                    push!(lang_embs, _llang=>Dict{type_word, Vector{E}}())
                     push!(fuzzy_words, _llang=>type_word[])
                 end
                 occursin("#", word) && push!(fuzzy_words[_llang], word)
@@ -163,7 +163,7 @@ function _load_hdf5_embeddings(filepath::S1,
             end
         end
     end
-    return ConceptNet{type_lang, type_word, Int8}(lang_embs, size(embeddings,1), fuzzy_words)
+    return ConceptNet{type_lang, type_word, E}(lang_embs, size(embeddings,1), fuzzy_words)
 end
 
 
