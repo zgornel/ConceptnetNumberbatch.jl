@@ -1,5 +1,5 @@
 name = "ConceptnetNumberbatch"
-uuid = "2d1d9008-b762-11e8-11f1-375fdd6dca71"
+uuid = "6bdbf80b-0969-53f9-8443-f41591bd656e"
 authors = ["Corneliu Cofaru <cornel@oxoaresearch.com>"]
 version = "0.1.6"
 
