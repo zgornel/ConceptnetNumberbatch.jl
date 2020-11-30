@@ -1,7 +1,12 @@
-# Links pointing to the latest ConceptNetNumberbatch version (v"17.06")
-const CONCEPTNET_MULTI_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-17.06.txt.gz"
-const CONCEPTNET_EN_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-en-17.06.txt.gz"
-const CONCEPTNET_HDF5_LINK = "https://conceptnet.s3.amazonaws.com/precomputed-data/2016/numberbatch/17.06/mini.h5"
+# Links pointing to the older ConceptNetNumberbatch version (v"17.06")
+const CONCEPTNET_MULTI_LINK_1706 = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-17.06.txt.gz"
+const CONCEPTNET_EN_LINK_1706 = "https://conceptnet.s3.amazonaws.com/downloads/2017/numberbatch/numberbatch-en-17.06.txt.gz"
+const CONCEPTNET_HDF5_LINK_1706 = "https://conceptnet.s3.amazonaws.com/precomputed-data/2016/numberbatch/17.06/mini.h5"
+
+# Links pointing to the latest ConceptNetNumberbatch version (v"19.08")
+const CONCEPTNET_MULTI_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2019/numberbatch/numberbatch-19.08.txt.gz"
+const CONCEPTNET_EN_LINK = "https://conceptnet.s3.amazonaws.com/downloads/2019/numberbatch/numberbatch-en-19.08.txt.gz"
+const CONCEPTNET_HDF5_LINK = "http://conceptnet.s3.amazonaws.com/precomputed-data/2016/numberbatch/19.08/mini.h5"
 
 # Accepted languages (map from conceptnet to Languages.Language)
 const LANGUAGES = Dict(:en=>Languages.English(),
