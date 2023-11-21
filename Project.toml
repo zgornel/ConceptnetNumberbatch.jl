@@ -10,11 +10,11 @@ Languages = "8ef0a80b-9436-5d2c-a485-80b904378c43"
 TranscodingStreams = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 
 [compat]
-CodecZlib = "^0.5.1"
-HDF5 = "^0.10.2"
+CodecZlib = "^0.7"
+HDF5 = "^0.17"
 Languages = "^0.4"
-TranscodingStreams = "^0.8.1"
-julia = "1.0"
+TranscodingStreams = "^0.10"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
