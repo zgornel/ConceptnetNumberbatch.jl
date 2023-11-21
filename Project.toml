@@ -1,10 +1,11 @@
 name = "ConceptnetNumberbatch"
 uuid = "6bdbf80b-0969-53f9-8443-f41591bd656e"
 authors = ["Corneliu Cofaru <cornel@oxoaresearch.com>"]
-version = "0.1.6"
+version = "0.1.7"
 
 [deps]
 CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
+Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 Languages = "8ef0a80b-9436-5d2c-a485-80b904378c43"
 TranscodingStreams = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
@@ -14,7 +15,7 @@ CodecZlib = "^0.7"
 HDF5 = "^0.17"
 Languages = "^0.4"
 TranscodingStreams = "^0.10"
-julia = "1.6"
+julia = "1.10"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -19,7 +19,7 @@ This package is a simple API to **ConceptNetNumberbatch**.
 The following examples illustrate some common usage patterns:
 
 ```julia
-julia> using Conceptnet, Languages
+julia> using ConceptnetNumberbatch, Languages
        file_conceptnet = download_embeddings(url=CONCEPTNET_HDF5_LINK,
                                              localfile="./_conceptnet_/conceptnet.h5");
 # [ Info: Download ConceptNetNumberbatch to ./_conceptnet_/conceptnet.h5...

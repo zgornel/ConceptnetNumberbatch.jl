@@ -24,6 +24,7 @@ using TranscodingStreams
 using CodecZlib
 using HDF5
 using Languages
+using Downloads: download
 
 import Base: get, getindex, size, length, show, keys, values, in
 
